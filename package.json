@@ -1,6 +1,6 @@
 {
   "name": "dsh-simple-worktree",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Creates Git worktrees and opens them as DSH Workspaces in DeepSeek Harness.",
   "repository": {

@@ -6,7 +6,7 @@ export function createWorktreeApi(connection: ConnectionService) {
   async function call<T>(endpoint: string, payload: Record<string, unknown>): Promise<T> {
     const result = await connection.rpc.call(CHANNEL, endpoint, payload) as any
     if (!result?.ok) {
-      const error = new Error(result?.error?.message ?? "Worktree operation failed")
+      const error = new Error(result?.error?.message ?? "worktree operation failed")
       ;(error as Error & { code?: string }).code = result?.error?.code
       throw error
     }
