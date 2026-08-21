@@ -8,7 +8,7 @@ window.__ModuleLoader__.load({
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: color-mix(in srgb, var(--dsw-alias-bg-base, #000) 36%, transparent);
+    background: color-mix(in srgb, #000 80%, transparent);
   }
 
   .dwt-dialog-content {
