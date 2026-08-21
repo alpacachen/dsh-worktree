@@ -2,7 +2,7 @@
   "name": "dsh-simple-worktree",
   "version": "1.0.0",
   "private": true,
-  "description": "Task-oriented Git worktree management for DSH.",
+  "description": "Creates Git worktrees and opens them as DSH Workspaces in DeepSeek Harness.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alpacachen/dsh-worktree.git"
