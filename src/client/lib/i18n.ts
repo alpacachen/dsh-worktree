@@ -4,8 +4,8 @@ export const NS = "dsh-simple-worktree"
 type Dict = Record<string, string>
 
 const zh: Dict = {
-  createWorktree: "创建 Worktree",
-  dialogTitle: "{name} Worktree",
+  createWorktree: "创建 worktree",
+  dialogTitle: "{name} worktree",
   basedOn: "基于",
   currentBranch: "当前分支",
   mainBranch: "主分支",
@@ -15,14 +15,14 @@ const zh: Dict = {
   createAndOpen: "创建并打开",
   creating: "创建中…",
   fillTaskName: "请填写名称。",
-  operationFailed: "Worktree 操作失败：",
+  operationFailed: "worktree 操作失败：",
   close: "关闭",
   notGitWorkspace: "当前 Workspace 不是 Git 仓库。",
 }
 
 const en: Dict = {
   createWorktree: "Create worktree",
-  dialogTitle: "{name} Worktree",
+  dialogTitle: "{name} worktree",
   basedOn: "Base",
   currentBranch: "Current branch",
   mainBranch: "Main branch",
@@ -32,7 +32,7 @@ const en: Dict = {
   createAndOpen: "Create and open",
   creating: "Creating…",
   fillTaskName: "Enter a name.",
-  operationFailed: "Worktree operation failed: ",
+  operationFailed: "worktree operation failed: ",
   close: "Close",
   notGitWorkspace: "The current Workspace is not a Git repository.",
 }
