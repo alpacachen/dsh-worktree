@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import css from "./styles.css"
 import { CreateWorktreeDialog } from "./components/CreateWorktreeDialog"
 import { GitTreeIcon } from "./components/GitTreeIcon"
 import { createWorktreeApi } from "./lib/api"
@@ -6,10 +7,21 @@ import { installLocale, t } from "./lib/i18n"
 import { cleanPath } from "./lib/paths"
 import type { Workspace, WorkspaceExtensions } from "./lib/types"
 
+const STYLE_TAG = "data-dsh-worktree-style"
+
+function installStyles() {
+  if (typeof document === "undefined" || document.querySelector(`style[${STYLE_TAG}]`)) return
+  const style = document.createElement("style")
+  style.setAttribute(STYLE_TAG, "")
+  style.textContent = css
+  document.head.appendChild(style)
+}
+
 export const WorktreePlugin = {
   name: "dsh-worktree",
   inject: ["slots", "connection", "workspaces", "sessions", "workspaceExtensions"],
   apply(ctx: any) {
+    installStyles()
     installLocale(ctx)
     const api = createWorktreeApi(ctx.connection)
     const workspaces = ctx.workspaces
