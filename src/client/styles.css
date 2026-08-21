@@ -1,4 +1,5 @@
-.dwt-dialog-overlay {
+@layer dsh-worktree {
+  .dwt-dialog-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -51,6 +52,7 @@
   .dwt-error { margin-top: 10px; padding: 8px; border-radius: 7px; color: var(--dsw-alias-state-error-primary, #b42318); background: var(--dsw-alias-state-error-secondary, #fff1f0); font-size: 11px; }
   .dwt-hint { margin-top: 8px; color: var(--dsw-alias-label-secondary, #666); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dwt-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
