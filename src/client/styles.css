@@ -1,12 +1,12 @@
-@layer dsh-worktree {
-  .dwt-dialog-overlay {
+@layer dsh-simple-worktree {
+  .dswt-dialog-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
     background: color-mix(in srgb, #000 80%, transparent);
   }
 
-  .dwt-dialog-content {
+  .dswt-dialog-content {
     position: fixed;
     z-index: 1001;
     top: 50%;
@@ -26,7 +26,7 @@
     line-height: 20px;
   }
 
-  .dwt-dialog-close {
+  .dswt-dialog-close {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -43,14 +43,14 @@
     cursor: pointer;
   }
 
-  .dwt-dialog-close:hover { color: var(--dsw-alias-label-primary, #111); background: var(--dsw-alias-interactive-bg-hover, rgb(0 0 0 / .06)); }
-  .dwt-dialog-title { margin: 0; padding: 0 28px 0 0; color: var(--dsw-alias-label-primary, #111); font-size: 16px; font-weight: 500; line-height: 24px; }
-  .dwt-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  .dwt-field { display: block; box-sizing: border-box; min-width: 0; margin: 18px 0 0; border: 0; padding: 0; color: var(--dsw-alias-label-secondary, #666); font-size: 12px; line-height: 18px; }
-  .dwt-field-label { display: block; margin: 0 0 7px; color: var(--dsw-alias-label-secondary, #666); font-size: 12px; line-height: 18px; }
-  .dwt-base-fieldset { margin-top: 20px; }
+  .dswt-dialog-close:hover { color: var(--dsw-alias-label-primary, #111); background: var(--dsw-alias-interactive-bg-hover, rgb(0 0 0 / .06)); }
+  .dswt-dialog-title { margin: 0; padding: 0 28px 0 0; color: var(--dsw-alias-label-primary, #111); font-size: 16px; font-weight: 500; line-height: 24px; }
+  .dswt-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .dswt-field { display: block; box-sizing: border-box; min-width: 0; margin: 18px 0 0; border: 0; padding: 0; color: var(--dsw-alias-label-secondary, #666); font-size: 12px; line-height: 18px; }
+  .dswt-field-label { display: block; margin: 0 0 7px; color: var(--dsw-alias-label-secondary, #666); font-size: 12px; line-height: 18px; }
+  .dswt-base-fieldset { margin-top: 20px; }
 
-  .dwt-input {
+  .dswt-input {
     display: block;
     box-sizing: border-box;
     width: 100%;
@@ -67,32 +67,32 @@
     outline: none;
   }
 
-  .dwt-input::placeholder { color: var(--dsw-alias-label-tertiary, #888); }
-  .dwt-input:hover:not(:disabled) { border-color: var(--dsw-alias-border-l1, #bbb); }
-  .dwt-input:focus-visible { border-color: var(--dsw-alias-brand-primary, #2563eb); box-shadow: 0 0 0 2px color-mix(in srgb, var(--dsw-alias-brand-primary, #2563eb) 20%, transparent); }
+  .dswt-input::placeholder { color: var(--dsw-alias-label-tertiary, #888); }
+  .dswt-input:hover:not(:disabled) { border-color: var(--dsw-alias-border-l1, #bbb); }
+  .dswt-input:focus-visible { border-color: var(--dsw-alias-brand-primary, #2563eb); box-shadow: 0 0 0 2px color-mix(in srgb, var(--dsw-alias-brand-primary, #2563eb) 20%, transparent); }
 
-  .dwt-radio-group { display: grid; gap: 8px; }
-  .dwt-radio-option { display: flex; align-items: center; gap: 10px; box-sizing: border-box; min-height: 54px; border: 1px solid var(--dsw-alias-border-l2, #ccc); border-radius: 10px; padding: 9px 11px; color: var(--dsw-alias-label-primary, #111); background: var(--dsw-alias-bg-layer-1, #fff); cursor: pointer; transition: border-color .15s var(--ds-ease-in-out), background .15s var(--ds-ease-in-out), box-shadow .15s var(--ds-ease-in-out); }
-  .dwt-radio-option:hover { border-color: var(--dsw-alias-border-l1, #bbb); background: var(--dsw-alias-interactive-bg-hover, rgb(0 0 0 / .04)); }
-  .dwt-radio-option[data-selected="true"] { border-color: var(--dsw-alias-brand-primary, #2563eb); background: var(--dsw-alias-bg-layer-1, #fff); box-shadow: inset 0 0 0 1px var(--dsw-alias-brand-primary, #2563eb); }
-  .dwt-radio-option:has(.dwt-radio-input:focus-visible) { outline: 2px solid color-mix(in srgb, var(--dsw-alias-brand-primary, #2563eb) 36%, transparent); outline-offset: 2px; }
-  .dwt-radio-input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--dsw-alias-brand-primary, #2563eb); cursor: pointer; }
-  .dwt-radio-copy { display: flex; min-width: 0; flex-direction: column; gap: 1px; }
-  .dwt-radio-label { color: var(--dsw-alias-label-primary, #111); font-size: 13px; line-height: 19px; }
-  .dwt-radio-branch { overflow: hidden; color: var(--dsw-alias-label-tertiary, #777); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 17px; }
+  .dswt-radio-group { display: grid; gap: 8px; }
+  .dswt-radio-option { display: flex; align-items: center; gap: 10px; box-sizing: border-box; min-height: 54px; border: 1px solid var(--dsw-alias-border-l2, #ccc); border-radius: 10px; padding: 9px 11px; color: var(--dsw-alias-label-primary, #111); background: var(--dsw-alias-bg-layer-1, #fff); cursor: pointer; transition: border-color .15s var(--ds-ease-in-out), background .15s var(--ds-ease-in-out), box-shadow .15s var(--ds-ease-in-out); }
+  .dswt-radio-option:hover { border-color: var(--dsw-alias-border-l1, #bbb); background: var(--dsw-alias-interactive-bg-hover, rgb(0 0 0 / .04)); }
+  .dswt-radio-option[data-selected="true"] { border-color: var(--dsw-alias-brand-primary, #2563eb); background: var(--dsw-alias-bg-layer-1, #fff); box-shadow: inset 0 0 0 1px var(--dsw-alias-brand-primary, #2563eb); }
+  .dswt-radio-option:has(.dswt-radio-input:focus-visible) { outline: 2px solid color-mix(in srgb, var(--dsw-alias-brand-primary, #2563eb) 36%, transparent); outline-offset: 2px; }
+  .dswt-radio-input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--dsw-alias-brand-primary, #2563eb); cursor: pointer; }
+  .dswt-radio-copy { display: flex; min-width: 0; flex-direction: column; gap: 1px; }
+  .dswt-radio-label { color: var(--dsw-alias-label-primary, #111); font-size: 13px; line-height: 19px; }
+  .dswt-radio-branch { overflow: hidden; color: var(--dsw-alias-label-tertiary, #777); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 17px; }
 
-  .dwt-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-height: 32px; padding: 6px 12px; border: 1px solid var(--dsw-alias-border-l2, #ccc); border-radius: 8px; color: var(--dsw-alias-label-primary, #111); background: var(--dsw-alias-bg-layer-1, #fff); cursor: pointer; font: inherit; font-size: 13px; line-height: 18px; }
-  .dwt-button:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover, rgb(0 0 0 / .06)); }
-  .dwt-button:focus-visible { outline: 2px solid var(--dsw-alias-brand-primary, #2563eb); outline-offset: 2px; }
-  .dwt-button-primary { min-width: 96px; border-color: var(--dsw-alias-button-primary-fill, var(--dsw-alias-brand-primary, #2563eb)); color: var(--dsw-alias-label-primary-foreground, #fff); background: var(--dsw-alias-button-primary-fill, var(--dsw-alias-brand-primary, #2563eb)); }
-  .dwt-button-primary:hover:not(:disabled) { background: var(--dsw-alias-button-primary-hover, var(--dsw-alias-brand-primary, #2563eb)); }
-  .dwt-button:disabled { cursor: not-allowed; opacity: .5; }
-  .dwt-spin { animation: dwt-spin 1s linear infinite; }
-  @keyframes dwt-spin { to { transform: rotate(360deg); } }
-  .dwt-error { display: flex; align-items: flex-start; gap: 6px; margin-top: 14px; border-radius: 8px; padding: 8px 10px; color: var(--dsw-alias-state-error-primary, #b42318); background: var(--dsw-alias-state-error-secondary, #fff1f0); font-size: 12px; line-height: 18px; }
-  .dwt-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+  .dswt-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-height: 32px; padding: 6px 12px; border: 1px solid var(--dsw-alias-border-l2, #ccc); border-radius: 8px; color: var(--dsw-alias-label-primary, #111); background: var(--dsw-alias-bg-layer-1, #fff); cursor: pointer; font: inherit; font-size: 13px; line-height: 18px; }
+  .dswt-button:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover, rgb(0 0 0 / .06)); }
+  .dswt-button:focus-visible { outline: 2px solid var(--dsw-alias-brand-primary, #2563eb); outline-offset: 2px; }
+  .dswt-button-primary { min-width: 96px; border-color: var(--dsw-alias-button-primary-fill, var(--dsw-alias-brand-primary, #2563eb)); color: var(--dsw-alias-label-primary-foreground, #fff); background: var(--dsw-alias-button-primary-fill, var(--dsw-alias-brand-primary, #2563eb)); }
+  .dswt-button-primary:hover:not(:disabled) { background: var(--dsw-alias-button-primary-hover, var(--dsw-alias-brand-primary, #2563eb)); }
+  .dswt-button:disabled { cursor: not-allowed; opacity: .5; }
+  .dswt-spin { animation: dswt-spin 1s linear infinite; }
+  @keyframes dswt-spin { to { transform: rotate(360deg); } }
+  .dswt-error { display: flex; align-items: flex-start; gap: 6px; margin-top: 14px; border-radius: 8px; padding: 8px 10px; color: var(--dsw-alias-state-error-primary, #b42318); background: var(--dsw-alias-state-error-secondary, #fff1f0); font-size: 12px; line-height: 18px; }
+  .dswt-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dwt-dialog-overlay, .dwt-dialog-overlay *, .dwt-dialog-content, .dwt-dialog-content * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .dswt-dialog-overlay, .dswt-dialog-overlay *, .dswt-dialog-content, .dswt-dialog-content * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

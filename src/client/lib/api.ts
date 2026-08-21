@@ -1,6 +1,6 @@
 import type { ConnectionService, CreateWorktreeResult, WorktreeClassification, WorktreeList } from "./types"
 
-export const CHANNEL = "/dsh-worktree"
+export const CHANNEL = "/dsh-simple-worktree"
 
 export function createWorktreeApi(connection: ConnectionService) {
   async function call<T>(endpoint: string, payload: Record<string, unknown>): Promise<T> {

@@ -7,7 +7,7 @@ import { installLocale, NS, t } from "./lib/i18n"
 import { cleanPath } from "./lib/paths"
 import type { Workspace, WorkspaceExtensions } from "./lib/types"
 
-const STYLE_TAG = "data-dsh-worktree-style"
+const STYLE_TAG = "data-dsh-simple-worktree-style"
 
 function installStyles() {
   if (typeof document === "undefined" || document.querySelector(`style[${STYLE_TAG}]`)) return
@@ -18,11 +18,11 @@ function installStyles() {
 }
 
 export const WorktreePlugin = {
-  name: "dsh-worktree",
+  name: "dsh-simple-worktree",
   inject: ["slots", "connection", "locale", "workspaces", "sessions", "workspaceExtensions"],
   apply(ctx: any) {
     installStyles()
-    ctx.effect(() => installLocale(ctx), "dsh-worktree locale")
+    ctx.effect(() => installLocale(ctx), "dsh-simple-worktree locale")
     const api = createWorktreeApi(ctx.connection)
     const workspaces = ctx.workspaces
     const sessions = ctx.sessions
@@ -33,7 +33,7 @@ export const WorktreePlugin = {
     ctx.effect(() => {
       if (!locale || typeof locale.subscribe !== "function") return
       return locale.subscribe(() => workspaceExtensions.invalidate())
-    }, "dsh-worktree locale refresh")
+    }, "dsh-simple-worktree locale refresh")
     const worktreePaths = new Set<string>()
     let active = true
     let openCreate: (workspace: Workspace) => void = () => {}
@@ -61,12 +61,12 @@ export const WorktreePlugin = {
 
     ctx.effect(() => {
       const dispose = workspaceExtensions.register({
-        id: "dsh-worktree",
+        id: "dsh-simple-worktree",
         menuItem(workspace) {
           const path = cleanPath(workspace.path)
           if (!gitWorkspacePaths.has(path) || worktreePaths.has(path)) return undefined
           return {
-            id: "dsh-worktree.create",
+            id: "dsh-simple-worktree.create",
             label: t("createWorktree"),
             order: 30,
             onSelect: () => openCreate(workspace),
@@ -90,7 +90,7 @@ export const WorktreePlugin = {
         },
       })
       return dispose
-    }, "dsh-worktree workspace extensions")
+    }, "dsh-simple-worktree workspace extensions")
 
     ctx.effect(() => {
       active = true
@@ -101,7 +101,7 @@ export const WorktreePlugin = {
         refreshGeneration += 1
         dispose()
       }
-    }, "dsh-worktree workspace classification")
+    }, "dsh-simple-worktree workspace classification")
 
     function WorktreeOverlay() {
       const [target, setTarget] = useState<Workspace | null>(null)
@@ -126,7 +126,7 @@ export const WorktreePlugin = {
     }
 
     ctx.slots.inject("shell.overlay", () => ctx.slots.register(
-      { name: "shell.overlay", id: "dsh-worktree-create", order: 30, locale: NS, label: () => t("createWorktree") },
+      { name: "shell.overlay", id: "dsh-simple-worktree-create", order: 30, locale: NS, label: () => t("createWorktree") },
       WorktreeOverlay,
     ))
   },

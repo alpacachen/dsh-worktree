@@ -82,53 +82,53 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
   return (
     <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose() }}>
       <DialogContent>
-        <DialogTitle className="dwt-dialog-title">{format(t("dialogTitle"), { name: target.title })}</DialogTitle>
-        <DialogDescription className="dwt-visually-hidden">{target.title}</DialogDescription>
-        {error ? <div className="dwt-error" role="alert"><AlertCircle size={14} /> {error}</div> : null}
+        <DialogTitle className="dswt-dialog-title">{format(t("dialogTitle"), { name: target.title })}</DialogTitle>
+        <DialogDescription className="dswt-visually-hidden">{target.title}</DialogDescription>
+        {error ? <div className="dswt-error" role="alert"><AlertCircle size={14} /> {error}</div> : null}
 
-        <label className="dwt-field">
-          <span className="dwt-field-label">{t("taskName")}</span>
+        <label className="dswt-field">
+          <span className="dswt-field-label">{t("taskName")}</span>
           <Input aria-label={t("taskName")} value={taskName} disabled={busy} onChange={(event) => setTaskName(event.target.value)} placeholder={t("taskNamePlaceholder")} autoFocus />
         </label>
 
-        <fieldset className="dwt-field dwt-base-fieldset" disabled={busy || !data}>
-          <legend className="dwt-field-label">{t("basedOn")}</legend>
-          <div className="dwt-radio-group" role="radiogroup" aria-label={t("basedOn")}>
-            <label className="dwt-radio-option" data-selected={baseChoice === "current" ? "true" : undefined}>
+        <fieldset className="dswt-field dswt-base-fieldset" disabled={busy || !data}>
+          <legend className="dswt-field-label">{t("basedOn")}</legend>
+          <div className="dswt-radio-group" role="radiogroup" aria-label={t("basedOn")}>
+            <label className="dswt-radio-option" data-selected={baseChoice === "current" ? "true" : undefined}>
               <input
-                className="dwt-radio-input"
+                className="dswt-radio-input"
                 type="radio"
-                name="dwt-base-branch"
+                name="dswt-base-branch"
                 value="current"
                 checked={baseChoice === "current"}
                 onChange={() => setBaseChoice("current")}
               />
-              <span className="dwt-radio-copy">
-                <span className="dwt-radio-label">{t("currentBranch")}</span>
-                <span className="dwt-radio-branch">{currentBranch}</span>
+              <span className="dswt-radio-copy">
+                <span className="dswt-radio-label">{t("currentBranch")}</span>
+                <span className="dswt-radio-branch">{currentBranch}</span>
               </span>
             </label>
-            <label className="dwt-radio-option" data-selected={baseChoice === "main" ? "true" : undefined}>
+            <label className="dswt-radio-option" data-selected={baseChoice === "main" ? "true" : undefined}>
               <input
-                className="dwt-radio-input"
+                className="dswt-radio-input"
                 type="radio"
-                name="dwt-base-branch"
+                name="dswt-base-branch"
                 value="main"
                 checked={baseChoice === "main"}
                 onChange={() => setBaseChoice("main")}
               />
-              <span className="dwt-radio-copy">
-                <span className="dwt-radio-label">{t("mainBranch")}</span>
-                <span className="dwt-radio-branch">{mainBranch}</span>
+              <span className="dswt-radio-copy">
+                <span className="dswt-radio-label">{t("mainBranch")}</span>
+                <span className="dswt-radio-branch">{mainBranch}</span>
               </span>
             </label>
           </div>
         </fieldset>
 
-        <div className="dwt-dialog-actions">
+        <div className="dswt-dialog-actions">
           <Button type="button" disabled={busy} onClick={onClose}>{t("cancel")}</Button>
-          <Button type="button" className="dwt-button-primary" disabled={busy || !taskName.trim() || !data} onClick={create}>
-            {busy ? <Loader2 size={14} className="dwt-spin" /> : null}
+          <Button type="button" className="dswt-button-primary" disabled={busy || !taskName.trim() || !data} onClick={create}>
+            {busy ? <Loader2 size={14} className="dswt-spin" /> : null}
             {busy ? t("creating") : t("createAndOpen")}
           </Button>
         </div>

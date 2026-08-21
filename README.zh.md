@@ -1,6 +1,6 @@
 <div align="center">
 
-# dsh-worktree
+# dsh-simple-worktree
 
 ### 在 DeepSeek Harness 中管理并行 Git 工作区。
 
@@ -47,40 +47,4 @@ dsh plugin --profile web add github:alpacachen/dsh-worktree
 project/                         # 原 Workspace
 project.worktrees/login-fix/     # 新 Workspace
 └── branch: task/login-fix
-```
-
-## 🌿 分支选择
-
-插件按以下顺序识别主分支：
-
-1. `origin/HEAD`，例如 `origin/main`。
-2. 已存在的 `main`、`master`、`trunk` 或 `develop` 分支。
-3. 最后回退到仓库的主 Worktree 分支。
-
-当前分支始终读取自选中的 Workspace。
-
-## 🗂️ 删除行为
-
-删除 Worktree Workspace 时：
-
-1. 删除 Git Worktree 目录。
-2. 删除 DSH Workspace 注册。
-3. 保留对话，并将其显示在 **未分组** 中。
-
-不会删除任何对话。
-
-## 🛠️ 开发
-
-```sh
-pnpm install
-pnpm test
-```
-
-该命令会构建 Host 和 Client bundle，运行类型检查与单元测试，并验证已提交的构建产物。
-
-常用快捷命令：
-
-```sh
-pnpm typecheck
-pnpm test:unit
 ```

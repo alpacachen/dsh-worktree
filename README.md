@@ -1,6 +1,6 @@
 <div align="center">
 
-# dsh-worktree
+# dsh-simple-worktree
 
 ### Parallel Git workspaces, inside DeepSeek Harness.
 
@@ -47,40 +47,4 @@ The result looks like this:
 project/                         # existing Workspace
 project.worktrees/login-fix/     # new Workspace
 └── branch: task/login-fix
-```
-
-## 🌿 Branch selection
-
-The main branch is resolved in this order:
-
-1. `origin/HEAD`, such as `origin/main`.
-2. An existing `main`, `master`, `trunk`, or `develop` branch.
-3. The repository's primary worktree branch as a fallback.
-
-The current branch is always read from the selected Workspace.
-
-## 🗂️ Delete behavior
-
-Deleting a Worktree Workspace:
-
-1. Removes the Git worktree directory.
-2. Removes the DSH Workspace registration.
-3. Keeps its conversations and shows them under **Ungrouped**.
-
-No conversation is deleted.
-
-## 🛠️ Development
-
-```sh
-pnpm install
-pnpm test
-```
-
-The test command builds the Host and Client bundles, runs type checks and unit tests, and verifies the tracked package artifacts.
-
-Useful shortcuts:
-
-```sh
-pnpm typecheck
-pnpm test:unit
 ```

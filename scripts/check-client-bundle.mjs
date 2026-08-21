@@ -26,7 +26,7 @@ assert.ok(Array.isArray(plugin.inject), "client factory must return an inject li
 assert.equal(typeof plugin.apply, "function", "client factory must return apply")
 assert.doesNotMatch(clientBundle, /<\/?[A-Z][^>]*>/, "generated bundle must not contain JSX")
 assert.doesNotMatch(clientBundle, /(^|\n)\s*import\s/, "generated bundle must not contain ESM imports")
-assert.match(clientBundle, /data-dsh-worktree-style/, "client bundle must install the plugin stylesheet")
+assert.match(clientBundle, /data-dsh-simple-worktree-style/, "client bundle must install the plugin stylesheet")
 assert.match(clientBundle, /appendChild/, "client bundle must append the plugin stylesheet")
 assert.ok((await stat(bundlePath)).size > 0, "client bundle must not be empty")
 

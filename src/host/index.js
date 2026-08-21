@@ -1,4 +1,4 @@
-const CHANNEL = '/dsh-worktree'
+const CHANNEL = '/dsh-simple-worktree'
 
 export const ok = (value) => ({ ok: true, value })
 export const fail = (code, message, details = {}) => ({
@@ -105,7 +105,7 @@ export const classifyGitError = (message) => message.includes('not a git reposit
   ? 'bad-request'
   : undefined
 
-export const name = 'dsh-worktree'
+export const name = 'dsh-simple-worktree'
 export const inject = ['connection', 'subprocess']
 
 export function apply(ctx) {
@@ -191,5 +191,5 @@ export function apply(ctx) {
     })
 
     return fail('bad-request', `Unknown endpoint: ${endpoint}`)
-  }, { authority: 'loopback' }), 'dsh-worktree rpc')
+  }, { authority: 'loopback' }), 'dsh-simple-worktree rpc')
 }

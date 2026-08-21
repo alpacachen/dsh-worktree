@@ -1,5 +1,5 @@
 {
-  "name": "dsh-worktree",
+  "name": "dsh-simple-worktree",
   "version": "0.1.0",
   "private": true,
   "description": "Task-oriented Git worktree management for DSH.",
@@ -24,7 +24,8 @@
     "client",
     "cordis.patch.yml",
     "package.json",
-    "README.md"
+    "README.md",
+    "README.zh.md"
   ],
   "scripts": {
     "build": "node build.mjs",
