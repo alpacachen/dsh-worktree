@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { createWorktreeApi } from "../lib/api"
 import { format, useT } from "../lib/i18n"
-import { slugOf, suggestedPath } from "../lib/paths"
+import { cleanPath, slugOf, suggestedPath } from "../lib/paths"
 import type { SessionsService, WorkspacesService, Workspace, WorktreeList } from "../lib/types"
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input } from "./ui"
 
@@ -44,10 +44,11 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
   const taskSlug = slugOf(taskName)
   const taskBranch = `task/${taskSlug}`
   const taskPath = repoPath ? suggestedPath(repoPath, taskSlug) : ""
-  const currentBranch = data?.worktrees.find((row) => row.path === target.path)?.branch
-    ?? data?.worktrees.find((row) => row.isMain)?.branch
+  const currentBranch = data?.worktrees.find((row) => cleanPath(row.path) === cleanPath(target.path))?.branch
     ?? "HEAD"
-  const mainBranch = data?.worktrees.find((row) => row.isMain)?.branch ?? currentBranch
+  const mainBranch = data?.defaultBranch
+    ?? data?.worktrees.find((row) => row.isMain)?.branch
+    ?? currentBranch
   const baseRef = baseChoice === "main" ? mainBranch : currentBranch
 
   const create = async () => {

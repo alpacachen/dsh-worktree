@@ -51,9 +51,10 @@ describe("CreateWorktreeDialog", () => {
       list: vi.fn().mockResolvedValue({
         repoPath: "/repo",
         commonDir: "/repo/.git",
+        defaultBranch: "main",
         worktrees: [
-          { path: "/repo", branch: "main", isMain: true, detached: false, locked: false, prunable: false },
-          { path: "/repo.worktrees/feature", branch: "feature", isMain: false, detached: false, locked: false, prunable: false },
+          { path: "/repo", branch: "feature", isMain: true, detached: false, locked: false, prunable: false },
+          { path: "/repo.worktrees/feature", branch: "feature-task", isMain: false, detached: false, locked: false, prunable: false },
         ],
       }),
       create: vi.fn().mockResolvedValue({ path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" }),
@@ -62,6 +63,7 @@ describe("CreateWorktreeDialog", () => {
     render(<CreateWorktreeDialog target={{ workspaceId: "ws-feature", path: "/repo.worktrees/feature", title: "feature" }} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} onCreated={vi.fn()} onClose={vi.fn()} />)
 
     await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
+    expect(screen.getByText("main")).toBeTruthy()
     await user.click(screen.getByRole("radio", { name: /主分支/ }))
     await user.type(screen.getByLabelText("名称"), "Fix login")
     await user.click(screen.getByRole("button", { name: "创建并打开" }))

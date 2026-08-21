@@ -65,12 +65,13 @@ describe("worktree RPC contract", () => {
       "worktree list --porcelain": porcelain,
       "rev-parse --show-toplevel": "/repo",
       "rev-parse --git-common-dir": ".git",
+      "symbolic-ref --quiet --short refs/remotes/origin/HEAD": "origin/main",
     })
     expect(await handler("worktree.classify", { path: "/repo.worktrees/feature" })).toEqual({
       ok: true,
       value: { path: "/repo.worktrees/feature", isGit: true, isWorktree: true, repoPath: "/repo" },
     })
-    expect((await handler("worktree.list", { path: "/repo.worktrees/feature" })).value.repoPath).toBe("/repo")
+    expect((await handler("worktree.list", { path: "/repo.worktrees/feature" })).value).toMatchObject({ repoPath: "/repo", defaultBranch: "main" })
   })
 
   it("returns the stable error envelope for bad requests and cancellation", async () => {
