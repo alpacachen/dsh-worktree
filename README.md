@@ -6,6 +6,8 @@
 
 Create isolated Git worktrees without leaving DSH.
 
+[简体中文](README.zh.md) · **English**
+
 </div>
 
 ## ✨ Features
@@ -32,12 +34,12 @@ Restart `dsh web` so the plugin bundle is loaded.
 ### 2. Create a worktree
 
 1. Open a Git Workspace.
-2. Open its Workspace menu and choose **创建 Worktree** / **Create Worktree**.
+2. Open its Workspace menu and choose **Create Worktree**.
 3. Enter a task name, for example `login-fix`.
 4. Choose a base:
-   - **当前分支 / Current branch** — the branch of the selected Workspace.
-   - **主分支 / Main branch** — the repository default branch.
-5. Click **创建并打开** / **Create and open**.
+   - **Current branch** — the branch of the selected Workspace.
+   - **Main branch** — the repository default branch.
+5. Click **Create and open**.
 
 The result looks like this:
 
@@ -63,7 +65,7 @@ Deleting a Worktree Workspace:
 
 1. Removes the Git worktree directory.
 2. Removes the DSH Workspace registration.
-3. Keeps its conversations and shows them under **Ungrouped / 未分组**.
+3. Keeps its conversations and shows them under **Ungrouped**.
 
 No conversation is deleted.
 
