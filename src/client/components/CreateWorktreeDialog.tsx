@@ -4,7 +4,9 @@ import { createWorktreeApi } from "../lib/api"
 import { format, useT } from "../lib/i18n"
 import { slugOf, suggestedPath } from "../lib/paths"
 import type { SessionsService, WorkspacesService, Workspace, WorktreeList } from "../lib/types"
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input, Select } from "./ui"
+import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input } from "./ui"
+
+type BaseChoice = "current" | "main"
 
 interface CreateWorktreeDialogProps {
   target: Workspace
@@ -19,7 +21,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
   const t = useT()
   const [data, setData] = useState<WorktreeList | null>(null)
   const [taskName, setTaskName] = useState("")
-  const [baseRef, setBaseRef] = useState("")
+  const [baseChoice, setBaseChoice] = useState<BaseChoice>("current")
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
 
@@ -28,12 +30,10 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
     setData(null)
     setError("")
     setTaskName("")
-    setBaseRef("")
+    setBaseChoice("current")
     api.list(target.path).then((next) => {
       if (!alive) return
       setData(next)
-      const current = next.worktrees.find((row) => row.path === target.path)
-      setBaseRef(current?.branch ?? next.worktrees[0]?.branch ?? "HEAD")
     }).catch((reason) => {
       if (alive) setError(String(reason?.message ?? reason))
     })
@@ -44,7 +44,11 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
   const taskSlug = slugOf(taskName)
   const taskBranch = `task/${taskSlug}`
   const taskPath = repoPath ? suggestedPath(repoPath, taskSlug) : ""
-  const branchOptions = [...new Set((data?.worktrees ?? []).map((row) => row.branch).filter(Boolean) as string[])]
+  const currentBranch = data?.worktrees.find((row) => row.path === target.path)?.branch
+    ?? data?.worktrees.find((row) => row.isMain)?.branch
+    ?? "HEAD"
+  const mainBranch = data?.worktrees.find((row) => row.isMain)?.branch ?? currentBranch
+  const baseRef = baseChoice === "main" ? mainBranch : currentBranch
 
   const create = async () => {
     if (!repoPath || !taskName.trim()) {
@@ -56,7 +60,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
     let createdPath: string | undefined
     let workspace: Workspace | undefined
     try {
-      const created = await api.create({ repoPath, path: taskPath, branch: taskBranch, baseRef: baseRef || "HEAD" })
+      const created = await api.create({ repoPath, path: taskPath, branch: taskBranch, baseRef })
       createdPath = created.path
       workspace = await workspaces.create({ path: created.path })
       await workspaces.rename(workspace.workspaceId, `${target.title}/${taskSlug}`)
@@ -77,21 +81,49 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
   return (
     <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose() }}>
       <DialogContent>
-        <DialogTitle className="dwt-dialog-title">{t("dialogTitle")}</DialogTitle>
-        <DialogDescription className="dwt-dialog-description">{target.title}</DialogDescription>
+        <DialogTitle className="dwt-dialog-title">{format(t("dialogTitle"), { name: target.title })}</DialogTitle>
+        <DialogDescription className="dwt-visually-hidden">{target.title}</DialogDescription>
         {error ? <div className="dwt-error" role="alert"><AlertCircle size={14} /> {error}</div> : null}
+
         <label className="dwt-field">
-          {t("basedOn")}
-          <Select aria-label={t("basedOn")} value={baseRef} disabled={busy || !data} onChange={(event) => setBaseRef(event.target.value)}>
-            {(branchOptions.length ? branchOptions : ["HEAD"]).map((branch) => <option key={branch} value={branch}>{branch}</option>)}
-          </Select>
+          <span className="dwt-field-label">{t("taskName")}</span>
+          <Input aria-label={t("taskName")} value={taskName} disabled={busy} onChange={(event) => setTaskName(event.target.value)} placeholder={t("taskNamePlaceholder")} autoFocus />
         </label>
-        <label className="dwt-field">
-          {t("taskName")}
-          <Input aria-label={t("taskName")} value={taskName} disabled={busy} onChange={(event) => setTaskName(event.target.value)} placeholder={t("taskNamePlaceholder")} />
-        </label>
-        <div className="dwt-hint">{format(t("newBranch"), { branch: taskBranch })}</div>
-        <div className="dwt-hint">{format(t("directory"), { path: taskPath || t("loading") })}</div>
+
+        <fieldset className="dwt-field dwt-base-fieldset" disabled={busy || !data}>
+          <legend className="dwt-field-label">{t("basedOn")}</legend>
+          <div className="dwt-radio-group" role="radiogroup" aria-label={t("basedOn")}>
+            <label className="dwt-radio-option" data-selected={baseChoice === "current" ? "true" : undefined}>
+              <input
+                className="dwt-radio-input"
+                type="radio"
+                name="dwt-base-branch"
+                value="current"
+                checked={baseChoice === "current"}
+                onChange={() => setBaseChoice("current")}
+              />
+              <span className="dwt-radio-copy">
+                <span className="dwt-radio-label">{t("currentBranch")}</span>
+                <span className="dwt-radio-branch">{currentBranch}</span>
+              </span>
+            </label>
+            <label className="dwt-radio-option" data-selected={baseChoice === "main" ? "true" : undefined}>
+              <input
+                className="dwt-radio-input"
+                type="radio"
+                name="dwt-base-branch"
+                value="main"
+                checked={baseChoice === "main"}
+                onChange={() => setBaseChoice("main")}
+              />
+              <span className="dwt-radio-copy">
+                <span className="dwt-radio-label">{t("mainBranch")}</span>
+                <span className="dwt-radio-branch">{mainBranch}</span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
         <div className="dwt-dialog-actions">
           <Button type="button" disabled={busy} onClick={onClose}>{t("cancel")}</Button>
           <Button type="button" className="dwt-button-primary" disabled={busy || !taskName.trim() || !data} onClick={create}>
