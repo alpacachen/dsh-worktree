@@ -2,49 +2,53 @@
 
 # dsh-simple-worktree
 
-### 在 DeepSeek Harness 中管理并行 Git 工作区。
+### DeepSeek Harness 中的轻量 Git Worktree 小工具。
 
-无需离开 DSH，即可创建隔离的 Git Worktree。
+一个菜单，一个弹窗，一个隔离 Workspace。
 
 **简体中文** · [English](README.md)
 
 </div>
 
-## ✨ 功能
+## 为什么使用它？
 
-| 创建 | 隔离 | 保持在 DSH 中 |
-| --- | --- | --- |
-| 从任意 Git Workspace 创建 Worktree。 | 每个任务拥有独立目录和分支。 | 新 Worktree 会注册并打开为 DSH Workspace。 |
-| 支持当前分支或仓库默认分支。 | 分支格式为 `task/<name>`。 | 原有对话和 Workspace 保持不变。 |
+`dsh-simple-worktree` 只做一件事：创建 Git Worktree，并将它打开为 DSH Workspace。
 
-- 支持中文和英文界面。
-- 跟随 DSH 的浅色/深色主题和语言设置。
-- 删除 Worktree Workspace 时会删除 Git Worktree，但对话会保留在 **未分组** 中。
+- **小而专注**：没有看板、工作流或额外的项目管理层。
+- **无需额外服务**：直接使用 Git 和 DSH 现有的 Workspace 能力。
+- **无需配置**：选择分支、输入名称，然后开始工作。
+- **原生体验**：跟随 DSH 的主题和语言设置。
 
 ## 🚀 开始使用
 
-### 1. 安装
+### 安装
 
 ```sh
 dsh plugin --profile web add github:alpacachen/dsh-worktree
 ```
 
-重启 `dsh web`，使插件 bundle 生效。
+安装后重启 `dsh web`。
 
-### 2. 创建 Worktree
+### 创建 Worktree
 
 1. 打开一个 Git Workspace。
-2. 打开 Workspace 菜单，选择 **创建 Worktree**。
+2. 在 Workspace 菜单中选择 **创建 Worktree**。
 3. 输入任务名称，例如 `login-fix`。
-4. 选择基于：
-   - **当前分支**：当前 Workspace 所在的分支。
-   - **主分支**：仓库默认分支。
+4. 选择 **当前分支** 或 **主分支**。
 5. 点击 **创建并打开**。
 
-创建后的结构如下：
+插件会创建并打开：
 
 ```text
-project/                         # 原 Workspace
-project.worktrees/login-fix/     # 新 Workspace
+project.worktrees/login-fix/
 └── branch: task/login-fix
 ```
+
+新 Workspace 会命名为 `<父 Workspace>/<任务名称>`，可以直接开始独立对话。
+
+## 保持简单
+
+- 一个轻量弹窗，不引入新的工作流。
+- 每个任务一个 Git 分支：`task/<name>`。
+- 不影响已有 Workspace 和对话。
+- 支持中文和英文界面。
