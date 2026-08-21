@@ -28,6 +28,7 @@ assert.doesNotMatch(clientBundle, /<\/?[A-Z][^>]*>/, "generated bundle must not 
 assert.doesNotMatch(clientBundle, /(^|\n)\s*import\s/, "generated bundle must not contain ESM imports")
 assert.match(clientBundle, /data-dsh-worktree-style/, "client bundle must install the plugin stylesheet")
 assert.match(clientBundle, /appendChild/, "client bundle must append the plugin stylesheet")
+assert.doesNotMatch(clientBundle, /@layer dsh-worktree/, "plugin controls must stay outside CSS layers so they can override host resets")
 assert.ok((await stat(bundlePath)).size > 0, "client bundle must not be empty")
 
 console.log(`client bundle registers ${packageJson.name}`)

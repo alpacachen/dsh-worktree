@@ -3,8 +3,7 @@ window.__ModuleLoader__.load({
   factory: function (require) {
     var module = { exports: {} }
     var exports = module.exports
-"use strict";var uo=Object.create;var he=Object.defineProperty;var lo=Object.getOwnPropertyDescriptor;var so=Object.getOwnPropertyNames;var fo=Object.getPrototypeOf,no=Object.prototype.hasOwnProperty;var io=(e,a)=>{for(var t in a)he(e,t,{get:a[t],enumerable:!0})},ga=(e,a,t,o)=>{if(a&&typeof a=="object"||typeof a=="function")for(let r of so(a))!no.call(e,r)&&r!==t&&he(e,r,{get:()=>a[r],enumerable:!(o=lo(a,r))||o.enumerable});return e};var w=(e,a,t)=>(t=e!=null?uo(fo(e)):{},ga(a||!e||!e.__esModule?he(t,"default",{value:e,enumerable:!0}):t,e)),co=e=>ga(he({},"__esModule",{value:!0}),e);var Ar={};io(Ar,{default:()=>br});module.exports=co(Ar);var Ee=require("react");var Sa=`@layer dsh-worktree {
-  .dwt-dialog-overlay {
+"use strict";var uo=Object.create;var he=Object.defineProperty;var lo=Object.getOwnPropertyDescriptor;var so=Object.getOwnPropertyNames;var fo=Object.getPrototypeOf,no=Object.prototype.hasOwnProperty;var io=(e,a)=>{for(var t in a)he(e,t,{get:a[t],enumerable:!0})},ga=(e,a,t,o)=>{if(a&&typeof a=="object"||typeof a=="function")for(let r of so(a))!no.call(e,r)&&r!==t&&he(e,r,{get:()=>a[r],enumerable:!(o=lo(a,r))||o.enumerable});return e};var w=(e,a,t)=>(t=e!=null?uo(fo(e)):{},ga(a||!e||!e.__esModule?he(t,"default",{value:e,enumerable:!0}):t,e)),co=e=>ga(he({},"__esModule",{value:!0}),e);var Ar={};io(Ar,{default:()=>br});module.exports=co(Ar);var Ee=require("react");var Sa=`.dwt-dialog-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -57,7 +56,6 @@ window.__ModuleLoader__.load({
   .dwt-error { margin-top: 10px; padding: 8px; border-radius: 7px; color: var(--dsw-alias-state-error-primary, #b42318); background: var(--dsw-alias-state-error-secondary, #fff1f0); font-size: 11px; }
   .dwt-hint { margin-top: 8px; color: var(--dsw-alias-label-secondary, #666); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dwt-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
