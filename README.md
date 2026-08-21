@@ -23,6 +23,8 @@ dsh plugin --profile web add github:alpacachen/dsh-worktree
 
 Restart `dsh web` after installation.
 
+If pnpm reports `MINIMUM_RELEASE_AGE_VIOLATION` for packages already in the profile lockfile, retry this command with `--config.minimum-release-age=0`. If pnpm blocks the Git package build, add `dsh-simple-worktree: true` under `allowBuilds` in the profile's `pnpm-workspace.yaml`, then retry.
+
 ### Create a worktree
 
 1. Open a Git Workspace.
