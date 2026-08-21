@@ -3,7 +3,7 @@ import css from "./styles.css"
 import { CreateWorktreeDialog } from "./components/CreateWorktreeDialog"
 import { GitTreeIcon } from "./components/GitTreeIcon"
 import { createWorktreeApi } from "./lib/api"
-import { installLocale, t } from "./lib/i18n"
+import { installLocale, NS, t } from "./lib/i18n"
 import { cleanPath } from "./lib/paths"
 import type { Workspace, WorkspaceExtensions } from "./lib/types"
 
@@ -19,15 +19,21 @@ function installStyles() {
 
 export const WorktreePlugin = {
   name: "dsh-worktree",
-  inject: ["slots", "connection", "workspaces", "sessions", "workspaceExtensions"],
+  inject: ["slots", "connection", "locale", "workspaces", "sessions", "workspaceExtensions"],
   apply(ctx: any) {
     installStyles()
-    installLocale(ctx)
+    ctx.effect(() => installLocale(ctx), "dsh-worktree locale")
     const api = createWorktreeApi(ctx.connection)
     const workspaces = ctx.workspaces
     const sessions = ctx.sessions
+    const locale = ctx.get("locale")
     const workspaceExtensions = ctx.workspaceExtensions as WorkspaceExtensions
     const gitWorkspacePaths = new Set<string>()
+
+    ctx.effect(() => {
+      if (!locale || typeof locale.subscribe !== "function") return
+      return locale.subscribe(() => workspaceExtensions.invalidate())
+    }, "dsh-worktree locale refresh")
     const worktreePaths = new Set<string>()
     let active = true
     let openCreate: (workspace: Workspace) => void = () => {}
@@ -120,7 +126,7 @@ export const WorktreePlugin = {
     }
 
     ctx.slots.inject("shell.overlay", () => ctx.slots.register(
-      { name: "shell.overlay", id: "dsh-worktree-create", order: 30, label: () => t("createWorktree") },
+      { name: "shell.overlay", id: "dsh-worktree-create", order: 30, locale: NS, label: () => t("createWorktree") },
       WorktreeOverlay,
     ))
   },

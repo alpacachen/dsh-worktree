@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react"
 
-const NS = "dsh-worktree"
+export const NS = "dsh-worktree"
 type Dict = Record<string, string>
 
 const zh: Dict = {
@@ -41,16 +41,25 @@ let localeService: any = null
 let boundT: ((key: string) => string) | null = null
 
 export function installLocale(ctx: any) {
-  const locale = ctx.get("locale")
-  if (locale === undefined) return
+  const locale = ctx?.get?.("locale")
+  if (!locale || typeof locale.register !== "function" || typeof locale.bind !== "function") return () => {}
+
   localeService = locale
+  let dispose: (() => void) | undefined
   try {
-    locale.register(NS, "zh", zh)
-    locale.register(NS, "en", en)
+    dispose = locale.register(NS, { zh, en })
   } catch {
-    // HMR may re-run registration; the existing dictionary is still valid.
+    // A duplicate registration can happen during HMR; keep using the existing dictionaries.
   }
   boundT = locale.bind(NS)
+
+  return () => {
+    dispose?.()
+    if (localeService === locale) {
+      localeService = null
+      boundT = null
+    }
+  }
 }
 
 export function t(key: string): string {
