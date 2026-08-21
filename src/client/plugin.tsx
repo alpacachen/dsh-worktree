@@ -68,6 +68,7 @@ export const WorktreePlugin = {
           return {
             id: "dsh-simple-worktree.create",
             label: t("createWorktree"),
+            icon: <GitTreeIcon />,
             order: 30,
             onSelect: () => openCreate(workspace),
           }

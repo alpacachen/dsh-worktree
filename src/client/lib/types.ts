@@ -42,6 +42,7 @@ export interface WorkspaceExtensions {
     menuItem?: (workspace: Workspace) => {
       id: string
       label: string
+      icon?: ReactNode
       order?: number
       onSelect?: () => void | Promise<void>
     } | undefined

@@ -1,6 +1,6 @@
 {
   "name": "dsh-simple-worktree",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Task-oriented Git worktree management for DSH.",
   "repository": {

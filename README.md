@@ -26,7 +26,7 @@ Restart `dsh web` after installation.
 ### Create a worktree
 
 1. Open a Git Workspace.
-2. Open the Workspace menu and choose **Create Worktree**.
+2. Open the Workspace menu and choose **Create worktree**.
 3. Enter a task name, such as `login-fix`.
 4. Choose **Current branch** or **Main branch**.
 5. Click **Create and open**.

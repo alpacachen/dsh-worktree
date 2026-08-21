@@ -31,7 +31,7 @@ describe("CreateWorktreeDialog", () => {
     render(<CreateWorktreeDialog target={target} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} onCreated={vi.fn()} onClose={onClose} />)
 
     await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
-    expect(screen.getByText("apple WorkTree")).toBeTruthy()
+    expect(screen.getByText("apple Worktree")).toBeTruthy()
     expect(screen.getByRole("radio", { name: /主分支/ })).toBeTruthy()
     expect(screen.queryByText(/新分支|目录/)).toBeNull()
     await user.type(screen.getByLabelText("名称"), "Fix login")

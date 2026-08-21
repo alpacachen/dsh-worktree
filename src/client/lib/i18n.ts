@@ -5,7 +5,7 @@ type Dict = Record<string, string>
 
 const zh: Dict = {
   createWorktree: "创建 Worktree",
-  dialogTitle: "{name} WorkTree",
+  dialogTitle: "{name} Worktree",
   basedOn: "基于",
   currentBranch: "当前分支",
   mainBranch: "主分支",
@@ -21,8 +21,8 @@ const zh: Dict = {
 }
 
 const en: Dict = {
-  createWorktree: "Create Worktree",
-  dialogTitle: "{name} WorkTree",
+  createWorktree: "Create worktree",
+  dialogTitle: "{name} Worktree",
   basedOn: "Base",
   currentBranch: "Current branch",
   mainBranch: "Main branch",
