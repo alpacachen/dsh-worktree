@@ -105,7 +105,7 @@ export const classifyGitError = (message) => message.includes('not a git reposit
   ? 'bad-request'
   : undefined
 
-export const name = 'dsh-simple-worktree'
+export const name = '@alpacachen/dsh-simple-worktree'
 export const inject = ['connection', 'subprocess']
 
 export function apply(ctx) {

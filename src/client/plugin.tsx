@@ -18,7 +18,7 @@ function installStyles() {
 }
 
 export const WorktreePlugin = {
-  name: "dsh-simple-worktree",
+  name: "@alpacachen/dsh-simple-worktree",
   inject: ["slots", "connection", "locale", "workspaces", "sessions", "workspaceExtensions"],
   apply(ctx: any) {
     installStyles()

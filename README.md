@@ -18,12 +18,12 @@ A lightweight Git worktree plugin for DeepSeek Harness.
 ### Install
 
 ```sh
-dsh plugin --profile web add github:alpacachen/dsh-worktree
+dsh plugin --profile web add @alpacachen/dsh-simple-worktree
 ```
 
 Restart `dsh web` after installation.
 
-If pnpm reports `MINIMUM_RELEASE_AGE_VIOLATION` for packages already in the profile lockfile, retry this command with `--config.minimum-release-age=0`. If pnpm blocks the Git package build, add `dsh-simple-worktree: true` under `allowBuilds` in the profile's `pnpm-workspace.yaml`, then retry.
+You can also install from GitHub with `dsh plugin --profile web add github:alpacachen/dsh-worktree`.
 
 ### Create a worktree
 

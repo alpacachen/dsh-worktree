@@ -1,8 +1,18 @@
 {
-  "name": "dsh-simple-worktree",
-  "version": "1.0.1",
-  "private": true,
-  "description": "Creates Git worktrees and opens them as DSH Workspaces in DeepSeek Harness.",
+  "name": "@alpacachen/dsh-simple-worktree",
+  "version": "1.0.2",
+  "description": "A minimal worktree manager with one button and one dialog for DeepSeek Harness.",
+  "license": "MIT",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "git",
+    "worktree"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alpacachen/dsh-worktree.git"
@@ -34,7 +44,8 @@
     "check:client-bundle": "node scripts/check-client-bundle.mjs",
     "check:tracked-bundle": "node scripts/check-tracked-bundle.mjs",
     "check:package": "node scripts/check-package-contents.mjs",
-    "test": "pnpm build && pnpm typecheck && pnpm test:unit && pnpm check:client-bundle && pnpm check:tracked-bundle && pnpm check:package"
+    "test": "pnpm build && pnpm typecheck && pnpm test:unit && pnpm check:client-bundle && pnpm check:tracked-bundle && pnpm check:package",
+    "prepublishOnly": "pnpm test"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1"

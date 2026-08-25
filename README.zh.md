@@ -18,12 +18,12 @@
 ### 安装
 
 ```sh
-dsh plugin --profile web add github:alpacachen/dsh-worktree
+dsh plugin --profile web add @alpacachen/dsh-simple-worktree
 ```
 
 安装后重启 `dsh web`。
 
-如果 pnpm 因 profile lockfile 中已有依赖报 `MINIMUM_RELEASE_AGE_VIOLATION`，请在命令末尾加上 `--config.minimum-release-age=0` 后重试。如果 pnpm 阻止 Git 包构建，请在 profile 的 `pnpm-workspace.yaml` 中将 `dsh-simple-worktree: true` 加到 `allowBuilds` 下，然后重试。
+也可以通过 GitHub 安装：`dsh plugin --profile web add github:alpacachen/dsh-worktree`。
 
 ### 创建 Worktree
 
