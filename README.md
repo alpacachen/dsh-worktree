@@ -2,6 +2,8 @@
 
 A lightweight Git worktree plugin for DeepSeek Harness.
 
+[![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
+
 [简体中文](README.zh.md) · **English**
 
 ## Features
