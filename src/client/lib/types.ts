@@ -4,6 +4,7 @@ export interface Workspace {
   workspaceId: string
   path: string
   title: string
+  sessionIds?: string[]
 }
 
 export interface Worktree {

@@ -87,6 +87,9 @@
   .dswt-button-primary { min-width: 96px; border-color: var(--dsw-alias-button-primary-fill, var(--dsw-alias-brand-primary, #2563eb)); color: var(--dsw-alias-label-primary-foreground, #fff); background: var(--dsw-alias-button-primary-fill, var(--dsw-alias-brand-primary, #2563eb)); }
   .dswt-button-primary:hover:not(:disabled) { background: var(--dsw-alias-button-primary-hover, var(--dsw-alias-brand-primary, #2563eb)); }
   .dswt-button:disabled { cursor: not-allowed; opacity: .5; }
+  .dswt-new-session-action { display: flex; box-sizing: border-box; width: 100%; justify-content: flex-start; }
+  .dswt-new-session-button { min-height: 28px; padding: 4px 10px; border-radius: 7px; color: var(--dsw-alias-label-secondary, #666); background: var(--dsw-alias-bg-base, transparent); font-size: 12px; }
+  .dswt-new-session-button svg { width: 14px; height: 14px; }
   .dswt-spin { animation: dswt-spin 1s linear infinite; }
   @keyframes dswt-spin { to { transform: rotate(360deg); } }
   .dswt-error { display: flex; align-items: flex-start; gap: 6px; margin-top: 14px; border-radius: 8px; padding: 8px 10px; color: var(--dsw-alias-state-error-primary, #b42318); background: var(--dsw-alias-state-error-secondary, #fff1f0); font-size: 12px; line-height: 18px; }

@@ -1,6 +1,6 @@
 {
   "name": "@alpacachen/dsh-simple-worktree",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A minimal worktree manager with one button and one dialog for DeepSeek Harness.",
   "license": "MIT",
   "keywords": [

@@ -13,15 +13,16 @@ interface CreateWorktreeDialogProps {
   api: ReturnType<typeof createWorktreeApi>
   workspaces: WorkspacesService
   sessions: SessionsService
+  defaultBaseChoice?: BaseChoice
   onCreated: (path: string) => void
   onClose: () => void
 }
 
-export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCreated, onClose }: CreateWorktreeDialogProps) {
+export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaultBaseChoice = "current", onCreated, onClose }: CreateWorktreeDialogProps) {
   const t = useT()
   const [data, setData] = useState<WorktreeList | null>(null)
   const [taskName, setTaskName] = useState("")
-  const [baseChoice, setBaseChoice] = useState<BaseChoice>("current")
+  const [baseChoice, setBaseChoice] = useState<BaseChoice>(defaultBaseChoice)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
 
@@ -30,7 +31,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
     setData(null)
     setError("")
     setTaskName("")
-    setBaseChoice("current")
+    setBaseChoice(defaultBaseChoice)
     api.list(target.path).then((next) => {
       if (!alive) return
       setData(next)
@@ -38,7 +39,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, onCrea
       if (alive) setError(String(reason?.message ?? reason))
     })
     return () => { alive = false }
-  }, [api, target.path])
+  }, [api, defaultBaseChoice, target.path])
 
   const repoPath = data?.repoPath
   const taskSlug = slugOf(taskName)

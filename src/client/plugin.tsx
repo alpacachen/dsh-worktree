@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import css from "./styles.css"
 import { CreateWorktreeDialog } from "./components/CreateWorktreeDialog"
 import { GitTreeIcon } from "./components/GitTreeIcon"
+import { NewSessionWorktreeButton } from "./components/NewSessionWorktreeButton"
 import { createWorktreeApi } from "./lib/api"
 import { installLocale, NS, t } from "./lib/i18n"
 import { cleanPath } from "./lib/paths"
@@ -36,7 +37,7 @@ export const WorktreePlugin = {
     }, "dsh-simple-worktree locale refresh")
     const worktreePaths = new Set<string>()
     let active = true
-    let openCreate: (workspace: Workspace) => void = () => {}
+    let openCreate: (workspace: Workspace, defaultBaseChoice?: "current" | "main") => void = () => {}
     let refreshGeneration = 0
 
     const refreshClassification = async () => {
@@ -105,26 +106,38 @@ export const WorktreePlugin = {
     }, "dsh-simple-worktree workspace classification")
 
     function WorktreeOverlay() {
-      const [target, setTarget] = useState<Workspace | null>(null)
+      const [request, setRequest] = useState<{ target: Workspace; defaultBaseChoice: "current" | "main" } | null>(null)
       useEffect(() => {
-        openCreate = (workspace) => setTarget(workspace)
+        openCreate = (target, defaultBaseChoice = "current") => setRequest({ target, defaultBaseChoice })
         return () => { openCreate = () => {} }
       }, [])
-      return target ? (
+      return request ? (
         <CreateWorktreeDialog
-          target={target}
+          target={request.target}
           api={api}
           workspaces={workspaces}
           sessions={sessions}
+          defaultBaseChoice={request.defaultBaseChoice}
           onCreated={(path) => {
             gitWorkspacePaths.add(cleanPath(path))
             worktreePaths.add(cleanPath(path))
             workspaceExtensions.invalidate()
           }}
-          onClose={() => setTarget(null)}
+          onClose={() => setRequest(null)}
         />
       ) : null
     }
+
+    ctx.slots.inject("conversation.input.dock", () => ctx.slots.register(
+      { name: "conversation.input.dock", id: "dsh-simple-worktree-new-session", order: -30, locale: NS, label: () => t("createWorktree") },
+      (props: any) => (
+        <NewSessionWorktreeButton
+          session={props.session}
+          useWorkspaces={props.useWorkspaces}
+          onOpen={(workspace) => openCreate(workspace, "main")}
+        />
+      ),
+    ))
 
     ctx.slots.inject("shell.overlay", () => ctx.slots.register(
       { name: "shell.overlay", id: "dsh-simple-worktree-create", order: 30, locale: NS, label: () => t("createWorktree") },
