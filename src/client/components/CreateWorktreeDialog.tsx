@@ -50,7 +50,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
   const mainBranch = data?.defaultBranch
     ?? data?.worktrees.find((row) => row.isMain)?.branch
     ?? currentBranch
-  const baseRef = baseChoice === "main" ? mainBranch : currentBranch
+  const baseRef = baseChoice === "main" ? data?.defaultRef ?? mainBranch : currentBranch
 
   const create = async () => {
     if (!repoPath || !taskName.trim()) {

@@ -42,18 +42,24 @@ async function tryRunGit(subprocess, cwd, args) {
 }
 
 export async function detectDefaultBranch(subprocess, repoPath, worktrees) {
-  const remoteHead = await tryRunGit(subprocess, repoPath, ['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD'])
+  const [remoteHead, refsOutput] = await Promise.all([
+    tryRunGit(subprocess, repoPath, ['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD']),
+    tryRunGit(subprocess, repoPath, ['for-each-ref', '--format=%(refname:short)', 'refs/heads', 'refs/remotes/origin']),
+  ])
+  const refs = new Set(refsOutput.split(/\r?\n/).filter(Boolean))
+
   if (remoteHead) {
     const separator = remoteHead.indexOf('/')
-    if (separator >= 0 && remoteHead.slice(separator + 1)) return remoteHead.slice(separator + 1)
+    const name = separator >= 0 ? remoteHead.slice(separator + 1) : ''
+    if (name) return { name, ref: refs.has(name) ? name : remoteHead }
   }
 
-  const refs = await tryRunGit(subprocess, repoPath, ['for-each-ref', '--format=%(refname:short)', 'refs/heads', 'refs/remotes/origin'])
-  const branches = refs.split(/\r?\n/).filter(Boolean).map((ref) => ref.startsWith('origin/') ? ref.slice('origin/'.length) : ref)
-  for (const preferred of ['main', 'master', 'trunk', 'develop']) {
-    if (branches.includes(preferred)) return preferred
+  for (const name of ['main', 'master', 'trunk', 'develop']) {
+    if (refs.has(name)) return { name, ref: name }
+    if (refs.has(`origin/${name}`)) return { name, ref: `origin/${name}` }
   }
-  return worktrees.find((worktree) => worktree.isMain)?.branch ?? worktrees.find((worktree) => worktree.branch)?.branch ?? 'HEAD'
+  const name = worktrees.find((worktree) => worktree.isMain)?.branch ?? worktrees.find((worktree) => worktree.branch)?.branch
+  return name ? { name, ref: name } : { name: 'HEAD', ref: 'HEAD' }
 }
 
 export function parseWorktrees(text) {
@@ -123,7 +129,7 @@ export function apply(ctx) {
       const worktrees = parseWorktrees(porcelain)
       const repoPath = worktrees.find((worktree) => worktree.isMain)?.path ?? topLevel
       const defaultBranch = await detectDefaultBranch(ctx.subprocess, repoPath, worktrees)
-       return { repoPath, commonDir, defaultBranch, worktrees }
+      return { repoPath, commonDir, defaultBranch: defaultBranch.name, defaultRef: defaultBranch.ref, worktrees }
     }, classifyGitError)
 
     if (endpoint === 'worktree.classify') return recover(async () => {

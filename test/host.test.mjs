@@ -71,7 +71,19 @@ describe("worktree RPC contract", () => {
       ok: true,
       value: { path: "/repo.worktrees/feature", isGit: true, isWorktree: true, repoPath: "/repo" },
     })
-    expect((await handler("worktree.list", { path: "/repo.worktrees/feature" })).value).toMatchObject({ repoPath: "/repo", defaultBranch: "main" })
+    expect((await handler("worktree.list", { path: "/repo.worktrees/feature" })).value).toMatchObject({ repoPath: "/repo", defaultBranch: "main", defaultRef: "origin/main" })
+  })
+
+  it("prefers a local default branch when both local and remote refs exist", async () => {
+    const handler = handleFor({
+      "worktree list --porcelain": porcelain,
+      "rev-parse --show-toplevel": "/repo",
+      "rev-parse --git-common-dir": ".git",
+      "symbolic-ref --quiet --short refs/remotes/origin/HEAD": "origin/main",
+      "for-each-ref --format=%(refname:short) refs/heads refs/remotes/origin": "main\norigin/main",
+    })
+
+    expect((await handler("worktree.list", { path: "/repo" })).value).toMatchObject({ defaultBranch: "main", defaultRef: "main" })
   })
 
   it("returns the stable error envelope for bad requests and cancellation", async () => {
