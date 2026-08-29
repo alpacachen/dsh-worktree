@@ -80,9 +80,10 @@ describe("CreateWorktreeDialog", () => {
         repoPath: "/repo",
         commonDir: "/repo/.git",
         defaultBranch: "main",
+        defaultRef: "origin/main",
         worktrees: [{ path: "/repo", branch: "feature", isMain: true, detached: false, locked: false, prunable: false }],
       }),
-      create: vi.fn().mockResolvedValue({ path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" }),
+      create: vi.fn().mockResolvedValue({ path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "origin/main" }),
       remove: vi.fn(),
     }
     render(<CreateWorktreeDialog target={target} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} defaultBaseChoice="main" onCreated={vi.fn()} onClose={vi.fn()} />)
@@ -91,7 +92,7 @@ describe("CreateWorktreeDialog", () => {
     await user.type(screen.getByLabelText("名称"), "Fix login")
     await user.click(screen.getByRole("button", { name: "创建并打开" }))
 
-    await waitFor(() => expect(api.create).toHaveBeenCalledWith({ repoPath: "/repo", path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" }))
+    await waitFor(() => expect(api.create).toHaveBeenCalledWith({ repoPath: "/repo", path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "origin/main" }))
   })
 
   it("shows a validation message without calling the host", async () => {

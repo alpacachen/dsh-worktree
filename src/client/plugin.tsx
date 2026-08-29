@@ -16,13 +16,14 @@ function installStyles() {
   style.setAttribute(STYLE_TAG, "")
   style.textContent = css
   document.head.appendChild(style)
+  return () => style.remove()
 }
 
 export const WorktreePlugin = {
   name: "@alpacachen/dsh-simple-worktree",
   inject: ["slots", "connection", "locale", "workspaces", "sessions", "workspaceExtensions"],
   apply(ctx: any) {
-    installStyles()
+    ctx.effect(installStyles, "dsh-simple-worktree styles")
     ctx.effect(() => installLocale(ctx), "dsh-simple-worktree locale")
     const api = createWorktreeApi(ctx.connection)
     const workspaces = ctx.workspaces

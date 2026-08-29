@@ -21,6 +21,7 @@ export interface WorktreeList {
   repoPath: string
   commonDir: string
   defaultBranch?: string
+  defaultRef?: string
   worktrees: Worktree[]
 }
 

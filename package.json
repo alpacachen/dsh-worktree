@@ -1,7 +1,7 @@
 {
   "name": "@alpacachen/dsh-simple-worktree",
-  "version": "1.0.5",
-  "description": "A minimal worktree manager with one button and one dialog for DeepSeek Harness.",
+  "version": "1.0.6",
+  "description": "A Git worktree plugin for DeepSeek Harness that creates task branches, registers worktrees as DSH Workspaces, and opens isolated sessions.",
   "license": "MIT",
   "keywords": [
     "deepseek-harness",
@@ -35,7 +35,8 @@
     "cordis.patch.yml",
     "package.json",
     "README.md",
-    "README.zh.md"
+    "README.zh.md",
+    "docs/preview.png"
   ],
   "scripts": {
     "build": "node build.mjs",
