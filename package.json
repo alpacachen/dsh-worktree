@@ -1,6 +1,6 @@
 {
   "name": "@alpacachen/dsh-simple-worktree",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A Git worktree plugin for DeepSeek Harness that creates task branches, registers worktrees as DSH Workspaces, and opens isolated sessions.",
   "license": "MIT",
   "keywords": [

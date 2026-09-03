@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { apply, parseWorktrees } from "../src/host/index.js"
+import { apply, fail, parseWorktrees } from "../src/host/index.js"
 
 function handleFor(outputs = {}) {
   let handler
@@ -86,6 +86,12 @@ describe("worktree RPC contract", () => {
     expect((await handler("worktree.list", { path: "/repo" })).value).toMatchObject({ defaultBranch: "main", defaultRef: "main" })
   })
 
+  it("normalizes plugin-specific errors to the DSH public error contract", () => {
+    expect(fail("not-git-repository", "fatal: not a git repository")).toMatchObject({
+      ok: false,
+      error: { code: "bad-request", message: "fatal: not a git repository" },
+    })
+  })
   it("returns the stable error envelope for bad requests and cancellation", async () => {
     const handler = handleFor()
     expect(await handler("worktree.unknown", {})).toMatchObject({ ok: false, error: { code: "bad-request", details: { issues: [] } } })
