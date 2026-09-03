@@ -22,7 +22,9 @@ function installStyles() {
 
 export const WorktreePlugin = {
   name: "@alpacachen/dsh-simple-worktree",
-  inject: ["slots", "connection", "locale", "workspaces", "sessions", "workspaceExtensions"],
+  // workspaceExtensions was introduced after the initial DSH workspace client.
+  // Keep it optional so older DSH versions can still load the core worktree UI.
+  inject: ["slots", "connection", "locale", "workspaces", "sessions"],
   apply(ctx: any) {
     ctx.effect(installStyles, "dsh-simple-worktree styles")
     ctx.effect(() => installLocale(ctx), "dsh-simple-worktree locale")
@@ -30,11 +32,11 @@ export const WorktreePlugin = {
     const workspaces = ctx.workspaces
     const sessions = ctx.sessions
     const locale = ctx.get("locale")
-    const workspaceExtensions = ctx.workspaceExtensions as WorkspaceExtensions
+    const workspaceExtensions = ctx.get("workspaceExtensions") as WorkspaceExtensions | undefined
     const gitWorkspacePaths = new Set<string>()
 
     ctx.effect(() => {
-      if (!locale || typeof locale.subscribe !== "function") return
+      if (!locale || typeof locale.subscribe !== "function" || !workspaceExtensions) return
       return locale.subscribe(() => workspaceExtensions.invalidate())
     }, "dsh-simple-worktree locale refresh")
     const worktreePaths = new Set<string>()
@@ -59,10 +61,11 @@ export const WorktreePlugin = {
         if (item?.isGit && item.path) gitWorkspacePaths.add(cleanPath(item.path))
         if (item?.isWorktree && item.path) worktreePaths.add(cleanPath(item.path))
       }
-      workspaceExtensions.invalidate()
+      workspaceExtensions?.invalidate()
     }
 
     ctx.effect(() => {
+      if (!workspaceExtensions) return
       const dispose = workspaceExtensions.register({
         id: "dsh-simple-worktree",
         menuItem(workspace) {
@@ -86,7 +89,7 @@ export const WorktreePlugin = {
             await workspaces.delete(workspace.workspaceId)
             gitWorkspacePaths.delete(path)
             worktreePaths.delete(path)
-            workspaceExtensions.invalidate()
+            workspaceExtensions?.invalidate()
           })()
         },
         icon(workspace) {
@@ -123,7 +126,7 @@ export const WorktreePlugin = {
           onCreated={(path) => {
             gitWorkspacePaths.add(cleanPath(path))
             worktreePaths.add(cleanPath(path))
-            workspaceExtensions.invalidate()
+            workspaceExtensions?.invalidate()
           }}
           onClose={() => setRequest(null)}
         />
