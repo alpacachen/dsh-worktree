@@ -111,7 +111,8 @@
   .dswt-repo-heading { display: flex; min-width: 0; align-items: center; gap: 10px; }
   .dswt-repo-icon { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 26px; height: 26px; border-radius: 7px; color: var(--dsw-alias-brand-primary, #2563eb); background: color-mix(in srgb, var(--dsw-alias-brand-primary, #2563eb) 10%, transparent); font-size: 16px; }
   .dswt-repo-heading h3 { overflow: hidden; margin: 0; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 650; line-height: 20px; }
-  .dswt-repo-heading p { overflow: hidden; max-width: 520px; margin: 2px 0 0; color: var(--dsw-alias-label-tertiary, #777); text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 16px; }
+  .dswt-repo-branch { display: flex; flex: none; align-items: baseline; gap: 6px; color: var(--dsw-alias-label-tertiary, #777); font-size: 11px; }
+  .dswt-repo-branch strong { color: var(--dsw-alias-label-primary, #111); font-size: 12px; font-weight: 600; }
   .dswt-worktree-list { padding: 0 16px; }
   .dswt-worktree { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; border-top: 1px solid var(--dsw-alias-border-l2, #eee); padding: 12px 0; }
   .dswt-worktree-info { min-width: 0; }

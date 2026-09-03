@@ -140,12 +140,12 @@ describe("WorktreesSettings", () => {
     return { api, workspaces, sessions }
   }
 
-  it("lists worktrees and opens an already registered workspace", async () => {
-    const existing = { workspaceId: "ws-feature", path: "/repo.worktrees/feature", title: "feature" }
-    const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/feature", branch: "feature", isMain: false, locked: false, prunable: false }], [existing])
+  it("groups linked worktrees without showing the main repository as a row", async () => {
+    const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/feature", branch: "feature", isMain: false, locked: false, prunable: false }], [])
     await waitFor(() => expect(screen.getByText("feature")).toBeTruthy())
-    await userEvent.setup().click(screen.getAllByRole("button", { name: "打开" })[1])
-    await waitFor(() => expect(next.sessions.open).toHaveBeenCalledWith("session"))
+    expect(screen.getByText("当前分支")).toBeTruthy()
+    expect(screen.queryByRole("button", { name: "打开" })).toBeNull()
+    expect([...document.querySelectorAll(".dswt-worktree-title")].some(node => node.textContent?.includes("main"))).toBe(false)
     expect(next.workspaces.create).not.toHaveBeenCalled()
   })
 
