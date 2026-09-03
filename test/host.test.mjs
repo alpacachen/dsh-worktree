@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { apply, fail, parseWorktrees } from "../src/host/index.js"
+import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { apply, discoverGitRoots, fail, parseWorktrees } from "../src/host/index.js"
 
 function handleFor(outputs = {}) {
   let handler
@@ -26,6 +29,22 @@ function handleFor(outputs = {}) {
 }
 
 describe("worktree porcelain parser", () => {
+  it("discovers nested Git roots while skipping noisy directories", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-worktree-"))
+    try {
+      await mkdir(join(root, "projects", "one", ".git"), { recursive: true })
+      await mkdir(join(root, "node_modules", "ignored", ".git"), { recursive: true })
+      await mkdir(join(root, "projects", "two"), { recursive: true })
+      await writeFile(join(root, "projects", "two", ".git"), "gitdir: ../one/.git\n")
+      expect((await discoverGitRoots(root)).sort()).toEqual([
+        join(root, "projects", "one"),
+        join(root, "projects", "two"),
+      ].sort())
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
   it("parses main, branches and worktree state flags", () => {
     const rows = parseWorktrees([
       "worktree /repo",

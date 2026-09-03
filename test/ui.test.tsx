@@ -124,12 +124,17 @@ describe("NewSessionWorktreeButton", () => {
     render(<NewSessionWorktreeButton session={{ sessionId: "session-new", blank: false }} useWorkspaces={useWorkspaces} onOpen={vi.fn()} />)
     expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
   })
+
+  it("stays hidden when the workspace is not a Git repository", () => {
+    render(<NewSessionWorktreeButton session={{ sessionId: "session-new", blank: true }} useWorkspaces={useWorkspaces} canCreate={() => false} onOpen={vi.fn()} />)
+    expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
+  })
 })
 
 describe("WorktreesSettings", () => {
   function renderSettings(rows: any[], items: any[] = []) {
     const workspaces: any = { list: { getSnapshot: () => ({ items }), subscribe: () => () => {} }, create: vi.fn().mockResolvedValue({ workspaceId: "new", path: rows[1]?.path, title: "" }), rename: vi.fn().mockResolvedValue(undefined), connectWorkspace: vi.fn().mockResolvedValue("session"), delete: vi.fn().mockResolvedValue(undefined) }
-    const api: any = { list: vi.fn().mockResolvedValue({ repoPath: "/repo", worktrees: rows }), status: vi.fn().mockImplementation((path: string) => Promise.resolve({ changedFiles: path.includes("dirty") ? 1 : 0, branchLine: "", output: "" })), remove: vi.fn().mockResolvedValue({}), prune: vi.fn().mockResolvedValue({}) }
+    const api: any = { list: vi.fn().mockResolvedValue({ repoPath: "/repo", worktrees: rows }), scan: vi.fn().mockResolvedValue([{ repoPath: "/repo", worktrees: rows }]), status: vi.fn().mockImplementation((path: string) => Promise.resolve({ changedFiles: path.includes("dirty") ? 1 : 0, branchLine: "", output: "" })), remove: vi.fn().mockResolvedValue({}), prune: vi.fn().mockResolvedValue({}) }
     const sessions: any = { open: vi.fn() }
     render(<WorktreesSettings api={api} workspaces={workspaces} sessions={sessions} />)
     return { api, workspaces, sessions }

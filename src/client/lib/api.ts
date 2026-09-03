@@ -23,6 +23,7 @@ export function createWorktreeApi(connection: ConnectionService) {
 
   return {
     list: (path: string) => call<WorktreeList>("worktree.list", { path }),
+    scan: (paths: string[]) => call<WorktreeList[]>("worktree.scan", { paths }),
     classify: (path: string) => call<WorktreeClassification>("worktree.classify", { path }),
     create: (payload: { repoPath: string; path: string; branch: string; baseRef: string }) => call<CreateWorktreeResult>("worktree.create", payload),
     remove: (payload: { repoPath: string; path: string }) => call<{ removed: boolean; path: string }>("worktree.remove", payload),
