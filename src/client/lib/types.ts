@@ -30,6 +30,7 @@ export interface WorktreeList {
   commonDir: string
   defaultBranch?: string
   defaultRef?: string
+  currentBranch?: string
   worktrees: Worktree[]
 }
 

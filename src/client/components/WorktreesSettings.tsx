@@ -28,11 +28,12 @@ export function WorktreesSettings({ api, workspaces, sessions }: Props) {
           const key = cleanPath(list.repoPath)
           if (key && !seen.has(key)) {
             seen.add(key)
-            const worktrees = await Promise.all(list.worktrees.map(async (row: Worktree) => {
+            const allWorktrees = await Promise.all(list.worktrees.map(async (row: Worktree) => {
               try { return { ...row, ...(await api.status(row.path)) } }
               catch (reason: any) { return { ...row, statusError: String(reason?.message ?? reason) } }
             }))
-            next.push({ ...list, worktrees })
+            const worktrees = allWorktrees.filter(row => !row.isMain)
+            if (worktrees.length > 0) next.push({ ...list, currentBranch: list.worktrees.find((row: Worktree) => row.isMain)?.branch, worktrees })
           }
         } catch { /* non-Git workspaces are intentionally skipped */ }
       }
@@ -49,26 +50,9 @@ export function WorktreesSettings({ api, workspaces, sessions }: Props) {
   }
   const totalWorktrees = repos.reduce((count, repo) => count + repo.worktrees.length, 0)
 
-  const open = async (repo: WorktreeList, row: Worktree) => {
-    setAction(row.path); setError("")
-    try {
-      let workspace = workspaces.list.getSnapshot().items.find(item => cleanPath(item.path) === cleanPath(row.path))
-      const created = !workspace
-      if (!workspace) workspace = await workspaces.create({ path: row.path })
-      if (created) {
-        const title = row.isMain ? t("mainRepository") : `${repo.defaultBranch ?? "worktree"}/${row.branch ?? "detached"}`
-        await workspaces.rename(workspace.workspaceId, title)
-      }
-      const sessionId = await workspaces.connectWorkspace(workspace.workspaceId)
-      sessions.open(sessionId)
-    } catch (reason: any) { setError(`${t("operationError")}${String(reason?.message ?? reason)}`) }
-    finally { setAction(null) }
-  }
-
   const remove = async (repo: WorktreeList, row: Worktree) => {
-    if (row.isMain) return
     const status = row.statusError ? t("unavailable") : row.changedFiles ? format(t("dirty"), { count: String(row.changedFiles) }) : t("clean")
-    if (row.changedFiles || row.statusError) { setError(row.statusError ? `${t("operationError")}${statusLabel(row)}` : t("dirtyRemoveBlocked")); return }
+    if (row.changedFiles) { setError(t("dirtyRemoveBlocked")); return }
     if (!window.confirm(format(t("removeConfirm"), { path: row.path, status }))) return
     setAction(row.path); setError("")
     try {
@@ -77,13 +61,6 @@ export function WorktreesSettings({ api, workspaces, sessions }: Props) {
       if (workspace) await workspaces.delete(workspace.workspaceId)
       await refresh()
     } catch (reason: any) { setError(`${t("operationError")}${String(reason?.message ?? reason)}`) }
-    finally { setAction(null) }
-  }
-
-  const prune = async (repo: WorktreeList) => {
-    setAction(repo.repoPath); setError("")
-    try { await api.prune(repo.repoPath); await refresh() }
-    catch (reason: any) { setError(`${t("operationError")}${String(reason?.message ?? reason)}`) }
     finally { setAction(null) }
   }
 
@@ -100,22 +77,21 @@ export function WorktreesSettings({ api, workspaces, sessions }: Props) {
     {repos.length === 0 && !busy ? <div className="dswt-empty"><p>{t("noWorktrees")}</p><span>{t("noWorktreesHint")}</span></div> : null}
     <div className="dswt-repo-list">
       {repos.map(repo => {
-        const staleCount = repo.worktrees.filter(row => row.prunable).length
         return <article className="dswt-repo" key={repo.repoPath}>
           <header className="dswt-repo-header">
             <div className="dswt-repo-heading"><span className="dswt-repo-icon"><FolderGit2 size={15} /></span><div><h3>{repoName(repo.repoPath)}</h3><p title={repo.repoPath}>{repo.repoPath}</p></div></div>
-            {staleCount > 0 ? <Button type="button" className="dswt-button-secondary" disabled={action === repo.repoPath} onClick={() => void prune(repo)}>{t("prune")} <span className="dswt-count">{staleCount}</span></Button> : null}
+            <div className="dswt-repo-branch"><span>{t("currentBranchLabel")}</span><strong>{repo.currentBranch ?? t("detached")}</strong></div>
           </header>
           <div className="dswt-worktree-list">
             {repo.worktrees.map(row => {
               const state = row.statusError ? "unavailable" : row.changedFiles ? "dirty" : row.prunable ? "prunable" : "clean"
               return <div className="dswt-worktree" key={row.path}>
                 <div className="dswt-worktree-info">
-                  <div className="dswt-worktree-title"><strong>{row.branch ?? t("detached")}</strong>{row.isMain ? <span className="dswt-badge dswt-badge-main">{t("mainRepository")}</span> : <span className="dswt-badge">{t("linkedWorktree")}</span>}</div>
+                  <div className="dswt-worktree-title"><strong>{row.branch ?? t("detached")}</strong></div>
                   <div className="dswt-worktree-path" title={row.path}>{relativePath(repo.repoPath, row.path)}</div>
                   <div className={`dswt-status dswt-status-${state}`}>{row.statusError ? statusLabel(row) : row.changedFiles ? format(t("dirty"), { count: String(row.changedFiles) }) : row.prunable ? t("prunable") : t("clean")}{row.locked ? ` · ${t("locked")}` : ""}</div>
                 </div>
-                <div className="dswt-worktree-actions"><Button type="button" className="dswt-button-primary" disabled={action === row.path || Boolean(row.statusError)} onClick={() => void open(repo, row)}>{action === row.path ? <Loader2 size={14} className="dswt-spin" /> : null}{t("open")}</Button>{!row.isMain && (row.prunable || row.statusError) ? <Button type="button" className="dswt-button-secondary" disabled={action === row.path} onClick={() => void prune(repo)}>{t("prune")}</Button> : null}{!row.isMain && !row.prunable && !row.statusError ? <Button type="button" className="dswt-button-danger" disabled={action === row.path} onClick={() => void remove(repo, row)}>{t("remove")}</Button> : null}</div>
+                <div className="dswt-worktree-actions"><Button type="button" className="dswt-button-danger" disabled={action === row.path} onClick={() => void remove(repo, row)}>{action === row.path ? <Loader2 size={14} className="dswt-spin" /> : null}{t("remove")}</Button></div>
               </div>
             })}
           </div>
