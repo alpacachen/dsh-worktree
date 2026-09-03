@@ -97,7 +97,8 @@ window.__ModuleLoader__.load({
   .dswt-new-session-button svg { width: 14px; height: 14px; }
   .dswt-spin { animation: dswt-spin 1s linear infinite; }
   @keyframes dswt-spin { to { transform: rotate(360deg); } }
-  .dswt-error { display: flex; align-items: flex-start; gap: 6px; margin-top: 14px; border-radius: 8px; padding: 8px 10px; color: var(--dsw-alias-state-error-primary, #b42318); background: var(--dsw-alias-state-error-secondary, #fff1f0); font-size: 12px; line-height: 18px; }
+  .dswt-error { display: flex; align-items: flex-start; gap: 7px; box-sizing: border-box; max-width: 100%; margin-top: 14px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary, #b42318) 24%, transparent); border-radius: 8px; padding: 9px 11px; color: var(--dsw-alias-state-error-primary, #b42318); background: color-mix(in srgb, var(--dsw-alias-state-error-primary, #b42318) 9%, var(--dsw-alias-bg-layer-1, #fff)); font-size: 12px; line-height: 18px; overflow-wrap: anywhere; }
+  .dswt-error svg { flex: none; margin-top: 2px; }
   .dswt-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
   .dswt-settings { color: var(--dsw-alias-label-primary, #111); font-size: 13px; }
   .dswt-settings-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
