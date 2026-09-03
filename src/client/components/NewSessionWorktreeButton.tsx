@@ -10,13 +10,14 @@ interface NewSessionWorktreeButtonProps {
   }
   useWorkspaces: <T>(selector: (state: { items: Workspace[] }) => T) => T
   onOpen: (workspace: Workspace) => void
+  canCreate?: (workspace: Workspace) => boolean
 }
 
-export function NewSessionWorktreeButton({ session, useWorkspaces, onOpen }: NewSessionWorktreeButtonProps) {
+export function NewSessionWorktreeButton({ session, useWorkspaces, onOpen, canCreate }: NewSessionWorktreeButtonProps) {
   const t = useT()
   const workspace = useWorkspaces((state) => state.items.find((item) => item.sessionIds?.includes(session.sessionId)))
 
-  if (!session.blank || !workspace) return null
+  if (!session.blank || !workspace || (canCreate && !canCreate(workspace))) return null
 
   return (
     <div className="dswt-new-session-action">

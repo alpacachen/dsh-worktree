@@ -139,6 +139,7 @@ export const WorktreePlugin = {
         <NewSessionWorktreeButton
           session={props.session}
           useWorkspaces={props.useWorkspaces}
+          canCreate={(workspace) => gitWorkspacePaths.has(cleanPath(workspace.path)) && !worktreePaths.has(cleanPath(workspace.path))}
           onOpen={(workspace) => openCreate(workspace, "main")}
         />
       ),
@@ -149,9 +150,11 @@ export const WorktreePlugin = {
       WorktreeOverlay,
     ))
 
-    // DSH's official settings extension point renders this inside Settings → Plugins.
-    ctx.slots.inject("settings.plugin.item", () => ctx.slots.register(
-      { name: "settings.plugin.item", key: NS, locale: NS, inject: () => ({}) },
+    // Register a first-class Settings sidebar section, alongside Plugins and
+    // the other built-in settings pages. This is intentionally not a plugin
+    // configuration item: Worktree management is a standalone workspace tool.
+    ctx.slots.inject("settings.section", () => ctx.slots.register(
+      { name: "settings.section", id: "dsh-simple-worktree", order: 45, label: () => t("worktrees"), locale: NS, inject: () => ({}) },
       () => <WorktreesSettings api={api} workspaces={workspaces} sessions={sessions} />,
     ))
   },

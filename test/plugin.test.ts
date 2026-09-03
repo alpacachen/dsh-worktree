@@ -22,7 +22,7 @@ describe("WorktreePlugin compatibility", () => {
     }
 
     expect(() => WorktreePlugin.apply(ctx)).not.toThrow()
-    expect(registeredSlots).toEqual(["conversation.input.dock", "shell.overlay", "settings.plugin.item"])
+    expect(registeredSlots).toEqual(["conversation.input.dock", "shell.overlay", "settings.section"])
     expect(WorktreePlugin.inject).not.toContain("workspaceExtensions")
   })
 })

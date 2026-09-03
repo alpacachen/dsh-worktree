@@ -22,9 +22,9 @@ export function WorktreesSettings({ api, workspaces, sessions }: Props) {
     setBusy(true); setError("")
     try {
       const seen = new Set<string>(); const next: WorktreeList[] = []
-      for (const workspace of workspaces.list.getSnapshot().items) {
+      const lists = await api.scan(workspaces.list.getSnapshot().items.map((workspace: any) => workspace.path))
+      for (const list of lists) {
         try {
-          const list = await api.list(workspace.path)
           const key = cleanPath(list.repoPath)
           if (key && !seen.has(key)) {
             seen.add(key)
