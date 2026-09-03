@@ -6,9 +6,14 @@ const SETTINGS_NS = settingsNamespace('dsh-simple-worktree')
 const SETTINGS_SCHEMA = z.object({})
 
 export const ok = (value) => ({ ok: true, value })
+const PUBLIC_ERROR_CODES = new Set([
+  'bad-request',
+  'cancelled',
+])
+
 export const fail = (code, message, details = {}) => ({
   ok: false,
-  error: { code, message, details: { issues: [], ...details } },
+  error: { code: PUBLIC_ERROR_CODES.has(code) ? code : 'bad-request', message, details: { issues: [], ...details } },
 })
 
 export const cleanPath = (value) => {
