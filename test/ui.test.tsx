@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import { CreateWorktreeDialog } from "../src/client/components/CreateWorktreeDialog"
 import { NewSessionWorktreeButton } from "../src/client/components/NewSessionWorktreeButton"
+import { WorktreesSettings } from "../src/client/components/WorktreesSettings"
 
 const target = { workspaceId: "ws-main", path: "/repo", title: "apple" }
 
@@ -122,5 +123,32 @@ describe("NewSessionWorktreeButton", () => {
   it("stays hidden after the session is no longer blank", () => {
     render(<NewSessionWorktreeButton session={{ sessionId: "session-new", blank: false }} useWorkspaces={useWorkspaces} onOpen={vi.fn()} />)
     expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
+  })
+})
+
+describe("WorktreesSettings", () => {
+  function renderSettings(rows: any[], items: any[] = []) {
+    const workspaces: any = { list: { getSnapshot: () => ({ items }), subscribe: () => () => {} }, create: vi.fn().mockResolvedValue({ workspaceId: "new", path: rows[1]?.path, title: "" }), rename: vi.fn().mockResolvedValue(undefined), connectWorkspace: vi.fn().mockResolvedValue("session"), delete: vi.fn().mockResolvedValue(undefined) }
+    const api: any = { list: vi.fn().mockResolvedValue({ repoPath: "/repo", worktrees: rows }), status: vi.fn().mockImplementation((path: string) => Promise.resolve({ changedFiles: path.includes("dirty") ? 1 : 0, branchLine: "", output: "" })), remove: vi.fn().mockResolvedValue({}), prune: vi.fn().mockResolvedValue({}) }
+    const sessions: any = { open: vi.fn() }
+    render(<WorktreesSettings api={api} workspaces={workspaces} sessions={sessions} />)
+    return { api, workspaces, sessions }
+  }
+
+  it("lists worktrees and opens an already registered workspace", async () => {
+    const existing = { workspaceId: "ws-feature", path: "/repo.worktrees/feature", title: "feature" }
+    const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/feature", branch: "feature", isMain: false, locked: false, prunable: false }], [existing])
+    await waitFor(() => expect(screen.getByText("feature")).toBeTruthy())
+    await userEvent.setup().click(screen.getAllByRole("button", { name: "打开" })[1])
+    await waitFor(() => expect(next.sessions.open).toHaveBeenCalledWith("session"))
+    expect(next.workspaces.create).not.toHaveBeenCalled()
+  })
+
+  it("protects dirty worktrees from removal", async () => {
+    const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/dirty", branch: "dirty", isMain: false, locked: false, prunable: false }], [{ workspaceId: "main", path: "/repo", title: "repo" }])
+    await waitFor(() => expect(screen.getByText(/dirty（1 个变更文件）/)).toBeTruthy())
+    await userEvent.setup().click(screen.getByRole("button", { name: "删除 Worktree" }))
+    expect(screen.getByRole("alert").textContent).toContain("未提交变更")
+    expect(next.api.remove).not.toHaveBeenCalled()
   })
 })
