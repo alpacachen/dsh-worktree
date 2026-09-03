@@ -9,12 +9,15 @@ function handleFor(outputs = {}) {
   const subprocess = {
     spawn({ argv }) {
       const key = argv.slice(3).join(" ")
-      const stdout = outputs[key] ?? ""
+      const result = outputs[key] ?? ""
+      const stdout = typeof result === "string" ? result : result.stdout ?? ""
+      const stderr = typeof result === "string" ? "" : result.stderr ?? ""
+      const exitCode = typeof result === "string" ? 0 : result.exitCode ?? 0
       return {
-        done: Promise.resolve({ exitCode: 0, signal: null }),
+        done: Promise.resolve({ exitCode, signal: null }),
         collected: {
           stdout: { readFrom: () => ({ text: stdout }) },
-          stderr: { readFrom: () => ({ text: "" }) },
+          stderr: { readFrom: () => ({ text: stderr }) },
         },
       }
     },
@@ -93,6 +96,16 @@ describe("worktree RPC contract", () => {
     expect((await handler("worktree.list", { path: "/repo.worktrees/feature" })).value).toMatchObject({ repoPath: "/repo", defaultBranch: "main", defaultRef: "origin/main" })
   })
 
+  it("reuses an existing branch when creating a worktree", async () => {
+    const handler = handleFor({
+      "show-ref --verify --quiet refs/heads/task/123": "abc refs/heads/task/123",
+      "worktree add /repo.worktrees/123 task/123": "Preparing worktree",
+    })
+    expect(await handler("worktree.create", { repoPath: "/repo", path: "/repo.worktrees/123", branch: "task/123", baseRef: "master" })).toEqual({
+      ok: true,
+      value: { path: "/repo.worktrees/123", branch: "task/123", baseRef: "master" },
+    })
+  })
   it("prefers a local default branch when both local and remote refs exist", async () => {
     const handler = handleFor({
       "worktree list --porcelain": porcelain,
