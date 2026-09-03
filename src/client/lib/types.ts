@@ -15,6 +15,14 @@ export interface Worktree {
   detached: boolean
   locked: boolean
   prunable: boolean
+  changedFiles?: number
+  statusError?: string
+}
+
+export interface WorktreeStatus {
+  branchLine: string
+  changedFiles: number
+  output: string
 }
 
 export interface WorktreeList {

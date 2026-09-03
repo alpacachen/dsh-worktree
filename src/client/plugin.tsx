@@ -3,6 +3,7 @@ import css from "./styles.css"
 import { CreateWorktreeDialog } from "./components/CreateWorktreeDialog"
 import { GitTreeIcon } from "./components/GitTreeIcon"
 import { NewSessionWorktreeButton } from "./components/NewSessionWorktreeButton"
+import { WorktreesSettings } from "./components/WorktreesSettings"
 import { createWorktreeApi } from "./lib/api"
 import { installLocale, NS, t } from "./lib/i18n"
 import { cleanPath } from "./lib/paths"
@@ -143,6 +144,12 @@ export const WorktreePlugin = {
     ctx.slots.inject("shell.overlay", () => ctx.slots.register(
       { name: "shell.overlay", id: "dsh-simple-worktree-create", order: 30, locale: NS, label: () => t("createWorktree") },
       WorktreeOverlay,
+    ))
+
+    // DSH's official settings extension point renders this inside Settings → Plugins.
+    ctx.slots.inject("settings.plugin.item", () => ctx.slots.register(
+      { name: "settings.plugin.item", key: NS, locale: NS, inject: () => ({}) },
+      () => <WorktreesSettings api={api} workspaces={workspaces} sessions={sessions} />,
     ))
   },
 }

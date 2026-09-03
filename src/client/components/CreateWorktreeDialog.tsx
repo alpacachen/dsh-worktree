@@ -25,6 +25,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
   const [baseChoice, setBaseChoice] = useState<BaseChoice>(defaultBaseChoice)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  const [recovery, setRecovery] = useState<{ repoPath: string; path: string; branch: string } | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -52,6 +53,31 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
     ?? currentBranch
   const baseRef = baseChoice === "main" ? data?.defaultRef ?? mainBranch : currentBranch
 
+  const registerAndOpen = async (createdPath: string, slug: string) => {
+    const workspace = await workspaces.create({ path: createdPath })
+    await workspaces.rename(workspace.workspaceId, `${target.title}/${slug}`)
+    const sessionId = await workspaces.connectWorkspace(workspace.workspaceId)
+    onCreated(createdPath)
+    sessions.open(sessionId)
+    onClose()
+  }
+
+  const retryRegister = async () => {
+    if (!recovery) return
+    setBusy(true); setError("")
+    try { await registerAndOpen(recovery.path, recovery.branch.replace(/^task\//, "")); setRecovery(null) }
+    catch (reason: any) { setError(`${t("registerFailed")} ${String(reason?.message ?? reason)}`) }
+    finally { setBusy(false) }
+  }
+
+  const cleanupCreated = async () => {
+    if (!recovery) return
+    setBusy(true); setError("")
+    try { await api.remove({ repoPath: recovery.repoPath, path: recovery.path }); setRecovery(null); onClose() }
+    catch (reason: any) { setError(format(t("cleanupFailed"), { error: String(reason?.message ?? reason), path: recovery.path })) }
+    finally { setBusy(false) }
+  }
+
   const create = async () => {
     if (!repoPath || !taskName.trim()) {
       setError(t("fillTaskName"))
@@ -68,13 +94,14 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
       await workspaces.rename(workspace.workspaceId, `${target.title}/${taskSlug}`)
       const sessionId = await workspaces.connectWorkspace(workspace.workspaceId)
       onCreated(created.path)
-      // Navigate only after every durable step succeeds.
       sessions.open(sessionId)
       onClose()
     } catch (reason: any) {
-      if (workspace?.workspaceId) void workspaces.delete(workspace.workspaceId).catch(() => undefined)
-      if (createdPath) void api.remove({ repoPath, path: createdPath }).catch(() => undefined)
-      setError(`${t("operationFailed")}${String(reason?.message ?? reason)}`)
+      if (workspace?.workspaceId) {
+        try { await workspaces.delete(workspace.workspaceId) } catch (cleanupError: any) { if (createdPath) setRecovery({ repoPath, path: createdPath, branch: taskBranch }); setError(format(t("cleanupFailed"), { error: String(cleanupError?.message ?? cleanupError), path: createdPath ?? "" })); return }
+      }
+      if (createdPath) { setRecovery({ repoPath, path: createdPath, branch: taskBranch }); setError(t("registerFailed")) }
+      else setError(`${t("operationFailed")}${String(reason?.message ?? reason)}`)
     } finally {
       setBusy(false)
     }
@@ -126,13 +153,14 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
           </div>
         </fieldset>
 
-        <div className="dswt-dialog-actions">
+        {recovery ? <div className="dswt-dialog-actions"><Button type="button" disabled={busy} onClick={() => void retryRegister()}>{t("retryRegister")}</Button><Button type="button" disabled={busy} onClick={() => void cleanupCreated()}>{t("cleanupCreated")}</Button></div> : null}
+        {!recovery ? <div className="dswt-dialog-actions">
           <Button type="button" disabled={busy} onClick={onClose}>{t("cancel")}</Button>
           <Button type="button" className="dswt-button-primary" disabled={busy || !taskName.trim() || !data} onClick={create}>
             {busy ? <Loader2 size={14} className="dswt-spin" /> : null}
             {busy ? t("creating") : t("createAndOpen")}
           </Button>
-        </div>
+        </div> : null}
       </DialogContent>
     </Dialog>
   )
