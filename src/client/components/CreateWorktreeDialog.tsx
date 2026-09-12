@@ -56,7 +56,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
   const registerAndOpen = async (createdPath: string, slug: string) => {
     const workspace = await workspaces.create({ path: createdPath })
     await workspaces.rename(workspace.workspaceId, `${target.title}/${slug}`)
-    const sessionId = await workspaces.connectWorkspace(workspace.workspaceId)
+    const sessionId = await sessions.create({ workspaceId: workspace.workspaceId })
     onCreated(createdPath)
     sessions.open(sessionId)
     onClose()
@@ -92,7 +92,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
       createdPath = created.path
       workspace = await workspaces.create({ path: created.path })
       await workspaces.rename(workspace.workspaceId, `${target.title}/${taskSlug}`)
-      const sessionId = await workspaces.connectWorkspace(workspace.workspaceId)
+      const sessionId = await sessions.create({ workspaceId: workspace.workspaceId })
       onCreated(created.path)
       sessions.open(sessionId)
       onClose()

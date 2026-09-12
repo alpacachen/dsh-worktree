@@ -1,11 +1,8 @@
-import type { ReactNode } from "react"
+import type { WorkspaceView, IWorkspaces } from "@deepseek-ai/dsh-api-workspace-controller/client"
+import type { ISessions } from "@deepseek-ai/dsh-api-session-controller/client"
 
-export interface Workspace {
-  workspaceId: string
-  path: string
-  title: string
-  sessionIds?: string[]
-}
+/** Workspace row projected by the Host Workspace Controller. */
+export type Workspace = WorkspaceView
 
 export interface Worktree {
   path: string
@@ -47,39 +44,15 @@ export interface CreateWorktreeResult {
   baseRef: string
 }
 
-export interface WorkspaceExtensions {
-  register(definition: {
-    id: string
-    menuItem?: (workspace: Workspace) => {
-      id: string
-      label: string
-      icon?: ReactNode
-      order?: number
-      onSelect?: () => void | Promise<void>
-    } | undefined
-    deleteWorkspace?: (workspace: Workspace) => void | Promise<void> | undefined
-    icon?: (workspace: Workspace, state: { expanded: boolean; active: boolean }) => ReactNode | undefined
-  }): () => void
-  invalidate(): void
-}
+/** The sessions service face (`ctx.sessions`). */
+export type SessionsService = ISessions
 
-export interface WorkspacesService {
-  list: {
-    getSnapshot(): { items: Workspace[] }
-    subscribe(listener: () => void): () => void
-  }
-  create(input: { path: string }): Promise<Workspace>
-  rename(workspaceId: string, title: string): Promise<unknown>
-  connectWorkspace(workspaceId: string): Promise<string>
-  delete(workspaceId: string): Promise<void>
-}
-
-export interface SessionsService {
-  open(sessionId: string): void
-}
-
+/** Minimal connection face the worktree API needs from `ctx.connection`. */
 export interface ConnectionService {
   rpc: {
     call(channel: string, endpoint: string, payload?: unknown, signal?: AbortSignal): Promise<unknown>
   }
 }
+
+/** The workspace service face (`ctx.workspaces`). */
+export type WorkspacesService = IWorkspaces

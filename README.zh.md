@@ -15,12 +15,17 @@
 
 ## 功能
 
-- 从新建对话入口或任意 Git Workspace 菜单创建 Worktree。
+- 从任意 Git Workspace 的新建对话入口创建 Worktree。
 - 支持当前分支和仓库主分支。
 - 将新 Worktree 注册为 DSH Workspace，并打开隔离会话。
 - 自动创建 `task/<name>` 格式的任务分支。
+- 在**设置 → Worktree 管理**页面扫描并管理所有 Worktree。
 - 不需要额外服务或项目配置。
 - 支持 DSH 主题、中文和英文界面。
+
+## 兼容性
+
+基于 DSH **0.1.5** 客户端契约构建（`0.1.5-rc.1 || 0.1.5-rc.2`，web profile）。
 
 ## 使用
 
@@ -41,12 +46,9 @@ dsh plugin --profile web add @alpacachen/dsh-simple-worktree
 3. 输入任务名称；此入口默认选择仓库主分支。
 4. 点击**创建并打开**。
 
-### 从 Workspace 菜单创建
+### 管理 Worktree
 
-1. 打开 Git Workspace 菜单，选择**创建 Worktree**。
-2. 输入任务名称，例如 `login-fix`。
-3. 选择**当前分支**或**主分支**。
-4. 点击**创建并打开**。
+打开**设置 → Worktree 管理**，扫描所有 Workspace 中的 Git 项目和关联的 Worktree，查看它们的分支与变更状态，并移除不再需要的 Worktree。
 
 Worktree 会创建在：
 
