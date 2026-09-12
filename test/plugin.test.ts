@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { WorktreePlugin } from "../src/client/plugin"
 
 describe("WorktreePlugin compatibility", () => {
-  it("loads when the legacy workspace client has no workspaceExtensions service", () => {
+  it("loads against the DSH 0.1.5 client contract", () => {
     const registeredSlots: string[] = []
     const workspaces = {
       list: {
@@ -14,15 +14,14 @@ describe("WorktreePlugin compatibility", () => {
       connection: { rpc: { call: vi.fn() } },
       workspaces,
       sessions: {},
-      get: () => undefined,
       effect: (effect: () => unknown) => effect(),
       slots: {
         inject: (name: string) => registeredSlots.push(name),
       },
     }
 
-    expect(() => WorktreePlugin.apply(ctx)).not.toThrow()
+    expect(() => WorktreePlugin.apply(ctx as any)).not.toThrow()
     expect(registeredSlots).toEqual(["conversation.input.dock", "shell.overlay", "settings.section"])
-    expect(WorktreePlugin.inject).not.toContain("workspaceExtensions")
+    expect(WorktreePlugin.inject).toEqual(["slots", "connection", "locale", "workspaces", "sessions"])
   })
 })

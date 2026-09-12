@@ -13,10 +13,12 @@ function services() {
     workspaces: {
       create: vi.fn().mockResolvedValue({ workspaceId: "ws-wt", path: "/repo.worktrees/fix-login", title: "fix-login" }),
       rename: vi.fn().mockResolvedValue(undefined),
-      connectWorkspace: vi.fn().mockResolvedValue("session-wt"),
       delete: vi.fn().mockResolvedValue(undefined),
     },
-    sessions: { open: vi.fn() },
+    sessions: {
+      create: vi.fn().mockResolvedValue("session-wt"),
+      open: vi.fn(),
+    },
   }
 }
 
@@ -30,7 +32,7 @@ describe("CreateWorktreeDialog", () => {
       remove: vi.fn(),
     }
     const onClose = vi.fn()
-    render(<CreateWorktreeDialog target={target} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} onCreated={vi.fn()} onClose={onClose} />)
+    render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={onClose} />)
 
     await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
     expect(screen.getByText("apple worktree")).toBeTruthy()
@@ -42,7 +44,7 @@ describe("CreateWorktreeDialog", () => {
     await waitFor(() => expect(next.sessions.open).toHaveBeenCalledWith("session-wt"))
     expect(api.create).toHaveBeenCalledWith({ repoPath: "/repo", path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" })
     expect(next.workspaces.rename).toHaveBeenCalledWith("ws-wt", "apple/fix-login")
-    expect(next.workspaces.connectWorkspace).toHaveBeenCalledWith("ws-wt")
+    expect(next.sessions.create).toHaveBeenCalledWith({ workspaceId: "ws-wt" })
     expect(onClose).toHaveBeenCalled()
   })
 
@@ -62,7 +64,7 @@ describe("CreateWorktreeDialog", () => {
       create: vi.fn().mockResolvedValue({ path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" }),
       remove: vi.fn(),
     }
-    render(<CreateWorktreeDialog target={{ workspaceId: "ws-feature", path: "/repo.worktrees/feature", title: "feature" }} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} onCreated={vi.fn()} onClose={vi.fn()} />)
+    render(<CreateWorktreeDialog target={{ workspaceId: "ws-feature" as any, path: "/repo.worktrees/feature", title: "feature" } as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={vi.fn()} />)
 
     await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
     expect(screen.getByText("main")).toBeTruthy()
@@ -87,7 +89,7 @@ describe("CreateWorktreeDialog", () => {
       create: vi.fn().mockResolvedValue({ path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "origin/main" }),
       remove: vi.fn(),
     }
-    render(<CreateWorktreeDialog target={target} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} defaultBaseChoice="main" onCreated={vi.fn()} onClose={vi.fn()} />)
+    render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} defaultBaseChoice="main" onCreated={vi.fn()} onClose={vi.fn()} />)
 
     await waitFor(() => expect(screen.getByRole("radio", { name: /主分支/ })).toHaveProperty("checked", true))
     await user.type(screen.getByLabelText("名称"), "Fix login")
@@ -99,7 +101,7 @@ describe("CreateWorktreeDialog", () => {
   it("shows a validation message without calling the host", async () => {
     const next = services()
     const api = { list: vi.fn().mockResolvedValue({ repoPath: "/repo", commonDir: "/repo/.git", worktrees: [] }), create: vi.fn(), remove: vi.fn() }
-    render(<CreateWorktreeDialog target={target} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions} onCreated={vi.fn()} onClose={vi.fn()} />)
+    render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={vi.fn()} />)
     await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
     expect(screen.getByRole("radio", { name: /主分支/ })).toBeTruthy()
     expect(screen.getByRole("button", { name: "创建并打开" })).toHaveProperty("disabled", true)
@@ -114,26 +116,26 @@ describe("NewSessionWorktreeButton", () => {
   it("opens the current workspace from a blank session", async () => {
     const user = userEvent.setup()
     const onOpen = vi.fn()
-    render(<NewSessionWorktreeButton session={{ sessionId: "session-new", blank: true }} useWorkspaces={useWorkspaces} onOpen={onOpen} />)
+    render(<NewSessionWorktreeButton session={{ sessionId: "session-new" as any, blank: true }} useWorkspaces={useWorkspaces as any} onOpen={onOpen} />)
 
     await user.click(screen.getByRole("button", { name: "创建 worktree" }))
     expect(onOpen).toHaveBeenCalledWith(workspace)
   })
 
   it("stays hidden after the session is no longer blank", () => {
-    render(<NewSessionWorktreeButton session={{ sessionId: "session-new", blank: false }} useWorkspaces={useWorkspaces} onOpen={vi.fn()} />)
+    render(<NewSessionWorktreeButton session={{ sessionId: "session-new" as any, blank: false }} useWorkspaces={useWorkspaces as any} onOpen={vi.fn()} />)
     expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
   })
 
   it("stays hidden when the workspace is not a Git repository", () => {
-    render(<NewSessionWorktreeButton session={{ sessionId: "session-new", blank: true }} useWorkspaces={useWorkspaces} canCreate={() => false} onOpen={vi.fn()} />)
+    render(<NewSessionWorktreeButton session={{ sessionId: "session-new" as any, blank: true }} useWorkspaces={useWorkspaces as any} canCreate={() => false} onOpen={vi.fn()} />)
     expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
   })
 })
 
 describe("WorktreesSettings", () => {
   function renderSettings(rows: any[], items: any[] = []) {
-    const workspaces: any = { list: { getSnapshot: () => ({ items }), subscribe: () => () => {} }, create: vi.fn().mockResolvedValue({ workspaceId: "new", path: rows[1]?.path, title: "" }), rename: vi.fn().mockResolvedValue(undefined), connectWorkspace: vi.fn().mockResolvedValue("session"), delete: vi.fn().mockResolvedValue(undefined) }
+    const workspaces: any = { list: { getSnapshot: () => ({ items }), subscribe: () => () => {} }, create: vi.fn().mockResolvedValue({ workspaceId: "new", path: rows[1]?.path, title: "" }), rename: vi.fn().mockResolvedValue(undefined), delete: vi.fn().mockResolvedValue(undefined) }
     const api: any = { list: vi.fn().mockResolvedValue({ repoPath: "/repo", worktrees: rows }), scan: vi.fn().mockResolvedValue([{ repoPath: "/repo", worktrees: rows }]), status: vi.fn().mockImplementation((path: string) => Promise.resolve({ changedFiles: path.includes("dirty") ? 1 : 0, branchLine: "", output: "" })), remove: vi.fn().mockResolvedValue({}), prune: vi.fn().mockResolvedValue({}) }
     const sessions: any = { open: vi.fn() }
     render(<WorktreesSettings api={api} workspaces={workspaces} sessions={sessions} />)

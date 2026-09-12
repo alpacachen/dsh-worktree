@@ -1,4 +1,14 @@
 import { useEffect, useState } from "react"
+import type { Context } from "@deepseek-ai/cordis"
+import type { ConnectionHandle } from "@deepseek-ai/dsh-client-connection/client"
+import type { PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots"
+import type {} from "@deepseek-ai/dsh-client-ui-renderer/client"
+import type {} from "@deepseek-ai/dsh-client-ui-conversation/client"
+import type {} from "@deepseek-ai/dsh-client-ui-layout/client"
+import type {} from "@deepseek-ai/dsh-client-ui-settings/client"
+import type {} from "@deepseek-ai/dsh-client-ui-workspace/client"
+import type {} from "@deepseek-ai/dsh-api-workspace-controller/client"
+import type {} from "@deepseek-ai/dsh-api-session-controller/client"
 import css from "./styles.css"
 import { CreateWorktreeDialog } from "./components/CreateWorktreeDialog"
 import { GitTreeIcon } from "./components/GitTreeIcon"
@@ -7,12 +17,17 @@ import { WorktreesSettings } from "./components/WorktreesSettings"
 import { createWorktreeApi } from "./lib/api"
 import { installLocale, NS, t } from "./lib/i18n"
 import { cleanPath } from "./lib/paths"
-import type { Workspace, WorkspaceExtensions } from "./lib/types"
+import type { Workspace } from "./lib/types"
+
+/** The client plugin context surface this plugin touches. */
+export type WorktreeClientContext = Context & {
+  connection: ConnectionHandle
+}
 
 const STYLE_TAG = "data-dsh-simple-worktree-style"
 
 function installStyles() {
-  if (typeof document === "undefined" || document.querySelector(`style[${STYLE_TAG}]`)) return
+  if (typeof document === "undefined" || document.querySelector(`style[${STYLE_TAG}]`)) return () => {}
   const style = document.createElement("style")
   style.setAttribute(STYLE_TAG, "")
   style.textContent = css
@@ -22,23 +37,18 @@ function installStyles() {
 
 export const WorktreePlugin = {
   name: "@alpacachen/dsh-simple-worktree",
-  // workspaceExtensions was introduced after the initial DSH workspace client.
-  // Keep it optional so older DSH versions can still load the core worktree UI.
   inject: ["slots", "connection", "locale", "workspaces", "sessions"],
-  apply(ctx: any) {
+  apply(ctx: WorktreeClientContext) {
     ctx.effect(installStyles, "dsh-simple-worktree styles")
     ctx.effect(() => installLocale(ctx), "dsh-simple-worktree locale")
     const api = createWorktreeApi(ctx.connection)
     const workspaces = ctx.workspaces
     const sessions = ctx.sessions
-    const locale = ctx.get("locale")
-    const workspaceExtensions = ctx.get("workspaceExtensions") as WorkspaceExtensions | undefined
-    const gitWorkspacePaths = new Set<string>()
 
-    ctx.effect(() => {
-      if (!locale || typeof locale.subscribe !== "function" || !workspaceExtensions) return
-      return locale.subscribe(() => workspaceExtensions.invalidate())
-    }, "dsh-simple-worktree locale refresh")
+    // Classification drives the "Create worktree" affordance in the
+    // conversation composer: only blank sessions of Git repositories that are
+    // not already linked worktrees get the button.
+    const gitWorkspacePaths = new Set<string>()
     const worktreePaths = new Set<string>()
     let active = true
     let openCreate: (workspace: Workspace, defaultBaseChoice?: "current" | "main") => void = () => {}
@@ -61,43 +71,7 @@ export const WorktreePlugin = {
         if (item?.isGit && item.path) gitWorkspacePaths.add(cleanPath(item.path))
         if (item?.isWorktree && item.path) worktreePaths.add(cleanPath(item.path))
       }
-      workspaceExtensions?.invalidate()
     }
-
-    ctx.effect(() => {
-      if (!workspaceExtensions) return
-      const dispose = workspaceExtensions.register({
-        id: "dsh-simple-worktree",
-        menuItem(workspace) {
-          const path = cleanPath(workspace.path)
-          if (!gitWorkspacePaths.has(path) || worktreePaths.has(path)) return undefined
-          return {
-            id: "dsh-simple-worktree.create",
-            label: t("createWorktree"),
-            icon: <GitTreeIcon />,
-            order: 30,
-            onSelect: () => openCreate(workspace),
-          }
-        },
-        deleteWorkspace(workspace) {
-          const path = cleanPath(workspace.path)
-          if (!worktreePaths.has(path)) return undefined
-          return (async () => {
-            const classified = await api.classify(workspace.path)
-            if (!classified.isWorktree || !classified.repoPath) return
-            await api.remove({ repoPath: classified.repoPath, path: workspace.path })
-            await workspaces.delete(workspace.workspaceId)
-            gitWorkspacePaths.delete(path)
-            worktreePaths.delete(path)
-            workspaceExtensions?.invalidate()
-          })()
-        },
-        icon(workspace) {
-          return worktreePaths.has(cleanPath(workspace.path)) ? <GitTreeIcon /> : undefined
-        },
-      })
-      return dispose
-    }, "dsh-simple-worktree workspace extensions")
 
     ctx.effect(() => {
       active = true
@@ -123,10 +97,8 @@ export const WorktreePlugin = {
           workspaces={workspaces}
           sessions={sessions}
           defaultBaseChoice={request.defaultBaseChoice}
-          onCreated={(path) => {
-            gitWorkspacePaths.add(cleanPath(path))
-            worktreePaths.add(cleanPath(path))
-            workspaceExtensions?.invalidate()
+          onCreated={() => {
+            void refreshClassification()
           }}
           onClose={() => setRequest(null)}
         />
@@ -134,8 +106,8 @@ export const WorktreePlugin = {
     }
 
     ctx.slots.inject("conversation.input.dock", () => ctx.slots.register(
-      { name: "conversation.input.dock", id: "dsh-simple-worktree-new-session", order: -30, locale: NS, label: () => t("createWorktree") },
-      (props: any) => (
+      { name: "conversation.input.dock", id: "dsh-simple-worktree-new-session", order: -30, label: () => t("createWorktree") },
+      (props: PropsRuntime<"conversation.input.dock">) => (
         <NewSessionWorktreeButton
           session={props.session}
           useWorkspaces={props.useWorkspaces}
@@ -146,7 +118,7 @@ export const WorktreePlugin = {
     ))
 
     ctx.slots.inject("shell.overlay", () => ctx.slots.register(
-      { name: "shell.overlay", id: "dsh-simple-worktree-create", order: 30, locale: NS, label: () => t("createWorktree") },
+      { name: "shell.overlay", id: "dsh-simple-worktree-create", order: 30, label: () => t("createWorktree") },
       WorktreeOverlay,
     ))
 
@@ -154,7 +126,7 @@ export const WorktreePlugin = {
     // the other built-in settings pages. This is intentionally not a plugin
     // configuration item: Worktree management is a standalone workspace tool.
     ctx.slots.inject("settings.section", () => ctx.slots.register(
-      { name: "settings.section", id: "dsh-simple-worktree", order: 45, label: () => t("worktrees"), locale: NS, inject: () => ({}) },
+      { name: "settings.section", id: "dsh-simple-worktree", order: 45, label: () => t("worktrees"), inject: () => ({}) },
       () => <WorktreesSettings api={api} workspaces={workspaces} sessions={sessions} />,
     ))
   },

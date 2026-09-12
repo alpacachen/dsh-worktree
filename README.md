@@ -15,12 +15,17 @@ A Git worktree plugin for DeepSeek Harness that creates task branches, registers
 
 ## Features
 
-- Create a Git worktree from a new-session action or any Git Workspace menu.
+- Create a Git worktree from the new-session action in any Git Workspace.
 - Choose the current branch or the repository's main branch.
 - Register and open the new worktree as a DSH Workspace with an isolated session.
 - Create task branches as `task/<name>`.
+- Manage and remove linked worktrees from the **Worktree Management** settings page.
 - No additional service or project configuration.
 - Supports DSH themes, Chinese, and English.
+
+## Compatibility
+
+Built against the DSH **0.1.5** client contract (`0.1.5-rc.1 || 0.1.5-rc.2`, web profile).
 
 ## Usage
 
@@ -41,12 +46,9 @@ You can also install from GitHub with `dsh plugin --profile web add github:alpac
 3. Enter a task name. The repository's main branch is selected by default.
 4. Click **Create and open**.
 
-### Create from a Workspace menu
+### Manage worktrees
 
-1. Open a Git Workspace menu and choose **Create worktree**.
-2. Enter a task name, such as `login-fix`.
-3. Choose **Current branch** or **Main branch**.
-4. Click **Create and open**.
+Open **Settings → Worktree Management** to scan every Workspace for Git projects and linked worktrees, inspect their branch and dirty state, and remove worktrees that are no longer needed.
 
 The worktree is created at:
 
