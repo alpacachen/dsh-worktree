@@ -5,7 +5,7 @@ import { join } from "node:path"
 import { apply, discoverGitRoots, fail, parseWorktrees } from "../src/host/index.js"
 
 function handleFor(outputs = {}) {
-  let handler
+  const routes = new Map()
   const subprocess = {
     spawn({ argv }) {
       const key = argv.slice(3).join(" ")
@@ -24,11 +24,36 @@ function handleFor(outputs = {}) {
   }
   const ctx = {
     subprocess,
-    connection: { rpc: { handle: (_channel, next) => { handler = next } } },
+    connection: { fetch: { register(route) {
+      expect(routes.has(route.path)).toBe(false)
+      routes.set(route.path, route)
+      return () => routes.delete(route.path)
+    } } },
     effect(effect) { return effect() },
   }
   apply(ctx)
-  return handler
+  const handler = async (endpoint, payload = {}, signal, method = `dsh-simple-worktree/${endpoint}`) => {
+    const path = `/api/dsh-simple-worktree/${endpoint}`
+    const route = routes.get(path)
+    expect(route, `missing exact route: ${path}`).toBeDefined()
+    expect(route.methods).toEqual(["POST"])
+    expect(route.requestBody).toBe("buffered")
+    const controller = new AbortController()
+    if (signal?.aborted) controller.abort()
+    const request = new Request(`http://localhost${path}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ type: "client-request", rpcId: "test", method, payload }),
+      signal: controller.signal,
+    })
+    const response = await route.fetch(request)
+    expect(response).toBeInstanceOf(Response)
+    expect(response.status).toBe(200)
+    const message = await response.json()
+    expect(message).toEqual({ type: "server-response", rpcId: "test", result: expect.any(Object) })
+    return message.result
+  }
+  return Object.assign(handler, { routes })
 }
 
 describe("worktree porcelain parser", () => {
@@ -43,6 +68,70 @@ describe("worktree porcelain parser", () => {
         join(root, "projects", "one"),
         join(root, "projects", "two"),
       ].sort())
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it("inspects depth four by default but does not descend to depth five", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-worktree-depth-"))
+    const depthFour = join(root, "a", "b", "c", "four")
+    const depthFive = join(root, "a", "b", "c", "d", "five")
+    try {
+      await mkdir(join(depthFour, ".git"), { recursive: true })
+      await mkdir(join(depthFive, ".git"), { recursive: true })
+      expect(await discoverGitRoots(root)).toEqual([depthFour])
+      expect((await discoverGitRoots(root, { maxDepth: 5 })).sort()).toEqual([depthFour, depthFive].sort())
+      expect(await discoverGitRoots(root, { maxDepth: 3 })).toEqual([])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it("skips hidden and noisy descendants but permits .worktrees and explicit hidden roots", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-worktree-hidden-"))
+    const ignored = [".cache", ".config", ".hidden", "node_modules", "Library", "dist", "build", "vendor"]
+    try {
+      for (const directory of [...ignored, ".worktrees", "projects"]) {
+        await mkdir(join(root, directory, "repo", ".git"), { recursive: true })
+      }
+      expect((await discoverGitRoots(root)).sort()).toEqual([
+        join(root, ".worktrees", "repo"), join(root, "projects", "repo"),
+      ].sort())
+      expect(await discoverGitRoots(join(root, ".hidden"))).toEqual([join(root, ".hidden", "repo")])
+      expect(await discoverGitRoots(join(root, ".hidden", "repo"), { maxDepth: 0 })).toEqual([join(root, ".hidden", "repo")])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it("throws instead of returning a partial scan when the directory budget is exceeded", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-worktree-budget-"))
+    try {
+      await mkdir(join(root, "repo", ".git"), { recursive: true })
+      await expect(discoverGitRoots(root, { maxDirectories: 1 })).rejects.toThrow(/scan limit reached.*more specific Workspace/)
+      expect(await discoverGitRoots(root, { maxDirectories: 2 })).toEqual([join(root, "repo")])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it("rejects an already cancelled scan with the AbortSignal reason", async () => {
+    const controller = new AbortController()
+    const reason = new Error("scan cancelled by caller")
+    controller.abort(reason)
+    await expect(discoverGitRoots(tmpdir(), { signal: controller.signal })).rejects.toBe(reason)
+  })
+
+  it("honors cancellation while a directory read is in flight", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-worktree-abort-"))
+    try {
+      await mkdir(join(root, "nested", "repo", ".git"), { recursive: true })
+      const controller = new AbortController()
+      const reason = new Error("scope changed")
+      const scan = discoverGitRoots(root, { signal: controller.signal })
+      controller.abort(reason)
+      await expect(scan).rejects.toBe(reason)
     } finally {
       await rm(root, { recursive: true, force: true })
     }
@@ -72,6 +161,13 @@ describe("worktree porcelain parser", () => {
 })
 
 describe("worktree RPC contract", () => {
+  it("registers only exact shared API routes for every endpoint", () => {
+    expect([...handleFor().routes.keys()].sort()).toEqual([
+      "worktree.list", "worktree.scan", "worktree.classify", "worktree.create",
+      "worktree.remove", "worktree.remove-session", "worktree.status", "worktree.prune",
+    ].map((endpoint) => `/api/dsh-simple-worktree/${endpoint}`).sort())
+  })
+
   const porcelain = [
     "worktree /repo",
     "HEAD abc",
@@ -126,7 +222,10 @@ describe("worktree RPC contract", () => {
   })
   it("returns the stable error envelope for bad requests and cancellation", async () => {
     const handler = handleFor()
-    expect(await handler("worktree.unknown", {})).toMatchObject({ ok: false, error: { code: "bad-request", details: { issues: [] } } })
+    expect(await handler("worktree.list", {})).toMatchObject({ ok: false, error: { code: "bad-request", details: { issues: [] } } })
+    expect(await handler("worktree.list", {}, undefined, "dsh-simple-worktree/worktree.unknown")).toMatchObject({
+      ok: false, error: { code: "bad-request", message: "RPC method does not match endpoint.", details: { issues: [] } },
+    })
     expect(await handler("worktree.list", {}, { aborted: true })).toMatchObject({ ok: false, error: { code: "cancelled" } })
   })
 })

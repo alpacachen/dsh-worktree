@@ -22,9 +22,8 @@ export function NewSessionWorktreeButton({ session, useWorkspaces, onOpen, canCr
 
   return (
     <div className="dswt-new-session-action">
-      <Button type="button" className="dswt-new-session-button" onClick={() => onOpen(workspace)}>
+      <Button type="button" className="dswt-new-session-button" aria-label={t("createWorktree")} title={t("createWorktree")} onClick={() => onOpen(workspace)}>
         <GitTreeIcon />
-        {t("createWorktree")}
       </Button>
     </div>
   )

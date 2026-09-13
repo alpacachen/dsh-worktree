@@ -19,14 +19,16 @@ export function Dialog({ children, ...props }: DialogPrimitive.DialogProps) {
   return <DialogPrimitive.Root {...props}>{children}</DialogPrimitive.Root>
 }
 
-export function DialogContent({ children }: { children: ReactNode }) {
+export function DialogContent({ children, className = "", busy = false }: { children: ReactNode; className?: string; busy?: boolean }) {
   const t = useT()
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="dswt-dialog-overlay" />
-      <DialogPrimitive.Content className="dswt-dialog-content">
+      <DialogPrimitive.Content className={`dswt-dialog-content ${className}`} aria-busy={busy || undefined}
+        onEscapeKeyDown={event => { if (busy) event.preventDefault() }}
+        onInteractOutside={event => { if (busy) event.preventDefault() }}>
         {children}
-        <DialogPrimitive.Close className="dswt-dialog-close" aria-label={t("close")}>
+        <DialogPrimitive.Close className="dswt-dialog-close" aria-label={t("close")} disabled={busy}>
           <X size={16} />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
