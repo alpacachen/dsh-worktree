@@ -35,7 +35,7 @@ describe("CreateWorktreeDialog", () => {
     render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={onClose} />)
 
     await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
-    expect(screen.getByText("apple worktree")).toBeTruthy()
+    expect(screen.getByRole("dialog", { name: "新建 Worktree" })).toBeTruthy()
     expect(screen.getByRole("radio", { name: /主分支/ })).toBeTruthy()
     expect(screen.queryByText(/新分支|目录/)).toBeNull()
     await user.type(screen.getByLabelText("名称"), "Fix login")
@@ -153,9 +153,14 @@ describe("WorktreesSettings", () => {
 
   it("protects dirty worktrees from removal", async () => {
     const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/dirty", branch: "dirty", isMain: false, locked: false, prunable: false }], [{ workspaceId: "main", path: "/repo", title: "repo" }])
-    await waitFor(() => expect(screen.getByText(/dirty（1 个变更文件）/)).toBeTruthy())
-    await userEvent.setup().click(screen.getByRole("button", { name: "删除 Worktree" }))
-    expect(screen.getByRole("alert").textContent).toContain("未提交变更")
+    await waitFor(() => expect(screen.getByText("1 个文件更改")).toBeTruthy())
+    const remove = screen.getByRole("button", { name: "删除 Worktree" })
+    expect(remove).toHaveProperty("disabled", true)
+    expect(remove.title).toBe("请先提交或保存更改，再删除 Worktree。")
+    await userEvent.setup().click(remove)
+    expect(screen.queryByRole("alert")).toBeNull()
+    expect(screen.queryByRole("dialog")).toBeNull()
     expect(next.api.remove).not.toHaveBeenCalled()
+    expect(next.workspaces.delete).not.toHaveBeenCalled()
   })
 })
