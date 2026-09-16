@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { t } from "../src/client/lib/i18n"
 import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -33,7 +34,7 @@ function setup({ repos = [repository("alpha", [worktree(linkedPath, "task/featur
   return { api, workspaces, sessions, onCreate, close, mount }
 }
 async function settled() {
-  await waitFor(() => expect(screen.getByRole("button", { name: "刷新" })).toHaveProperty("disabled", false))
+  await waitFor(() => expect(screen.getByRole("button", { name: t("refresh") })).toHaveProperty("disabled", false))
 }
 function repoArticle(name: string) {
   return within(screen.getByRole("heading", { name }).closest("article")!)
@@ -61,7 +62,7 @@ describe("WorktreesSettings discovery controls", () => {
     const next = setup({ repos })
     next.mount()
     await settled()
-    await user.type(screen.getByRole("textbox", { name: "搜索仓库、分支或路径" }), query)
+    await user.type(screen.getByRole("textbox", { name: t("searchPlaceholder") }), query)
     expect(visibleRepositories()).toEqual([expected])
     expect(next.api.scan).toHaveBeenCalledTimes(1)
     expect(next.workspaces.create).not.toHaveBeenCalled()
@@ -72,22 +73,22 @@ describe("WorktreesSettings discovery controls", () => {
     const next = setup({ repos })
     next.mount()
     await settled()
-    const filters = within(screen.getByRole("group", { name: "Worktree 管理" }))
-    expect(filters.getByRole("button", { name: "全部" }).getAttribute("aria-pressed")).toBe("true")
+    const filters = within(screen.getByRole("group", { name: t("worktrees") }))
+    expect(filters.getByRole("button", { name: t("filterAll") }).getAttribute("aria-pressed")).toBe("true")
     expect(visibleRepositories()).toEqual(["alpha", "beta", "empty"])
-    await user.click(filters.getByRole("button", { name: "有 Worktree" }))
+    await user.click(filters.getByRole("button", { name: t("filterLinked") }))
     expect(visibleRepositories()).toEqual(["alpha", "beta"])
-    expect(filters.getByRole("button", { name: "有 Worktree" }).getAttribute("aria-pressed")).toBe("true")
-    await user.click(filters.getByRole("button", { name: "需留意" }))
+    expect(filters.getByRole("button", { name: t("filterLinked") }).getAttribute("aria-pressed")).toBe("true")
+    await user.click(filters.getByRole("button", { name: t("filterAttention") }))
     expect(visibleRepositories()).toEqual(["beta"])
-    expect(filters.getByRole("button", { name: "需留意" }).getAttribute("aria-pressed")).toBe("true")
-    const search = screen.getByRole("textbox", { name: "搜索仓库、分支或路径" })
+    expect(filters.getByRole("button", { name: t("filterAttention") }).getAttribute("aria-pressed")).toBe("true")
+    const search = screen.getByRole("textbox", { name: t("searchPlaceholder") })
     await user.type(search, "no-match")
-    const emptyState = screen.getByRole("heading", { name: "没有匹配的项目" }).parentElement!
+    const emptyState = screen.getByRole("heading", { name: t("noMatches") }).parentElement!
     // A separate clear-query icon also exists in the search box.
-    await user.click(within(emptyState).getByRole("button", { name: "清除筛选" }))
+    await user.click(within(emptyState).getByRole("button", { name: t("clearFilters") }))
     expect(search).toHaveProperty("value", "")
-    expect(filters.getByRole("button", { name: "全部" }).getAttribute("aria-pressed")).toBe("true")
+    expect(filters.getByRole("button", { name: t("filterAll") }).getAttribute("aria-pressed")).toBe("true")
     expect(visibleRepositories()).toEqual(["alpha", "beta", "empty"])
     expect(next.api.scan).toHaveBeenCalledTimes(1)
   })
@@ -105,7 +106,7 @@ describe("WorktreesSettings discovery controls", () => {
     })
     next.mount()
     await settled()
-    await userEvent.setup().click(screen.getByRole("button", { name: "需留意" }))
+    await userEvent.setup().click(screen.getByRole("button", { name: t("filterAttention") }))
     expect(visibleRepositories()).toEqual(["locked", "prunable", "failed"])
   })
 
@@ -114,16 +115,16 @@ describe("WorktreesSettings discovery controls", () => {
     next.mount()
     await settled()
     const user = userEvent.setup()
-    const collapse = screen.getByRole("button", { name: "收起仓库 alpha" })
+    const collapse = screen.getByRole("button", { name: `${t("hideRepository")} alpha` })
     expect(collapse.getAttribute("aria-expanded")).toBe("true")
     await user.click(collapse)
     expect(screen.queryByText("task/feature")).toBeNull()
     expect(screen.getByText("fix/payments")).toBeTruthy()
-    const expand = screen.getByRole("button", { name: "展开仓库 alpha" })
+    const expand = screen.getByRole("button", { name: `${t("showRepository")} alpha` })
     expect(expand.getAttribute("aria-expanded")).toBe("false")
     await user.click(expand)
     expect(screen.getByText("task/feature")).toBeTruthy()
-    expect(screen.getByRole("button", { name: "收起仓库 alpha" }).getAttribute("aria-expanded")).toBe("true")
+    expect(screen.getByRole("button", { name: `${t("hideRepository")} alpha` }).getAttribute("aria-expanded")).toBe("true")
     expect(next.api.scan).toHaveBeenCalledTimes(1)
   })
 
@@ -133,7 +134,7 @@ describe("WorktreesSettings discovery controls", () => {
     await settled()
     const user = userEvent.setup()
     for (const name of ["alpha", "beta", "empty"]) {
-      await user.click(repoArticle(name).getByRole("button", { name: "创建 worktree" }))
+      await user.click(repoArticle(name).getByRole("button", { name: t("createWorktree") }))
       expect(next.onCreate).toHaveBeenLastCalledWith({ path: `/projects/${name}`, title: name })
     }
     expect(next.onCreate).toHaveBeenCalledTimes(3)
@@ -148,13 +149,13 @@ describe("WorktreesSettings safe removal", () => {
     next.mount()
     await settled()
     const user = userEvent.setup()
-    await user.click(screen.getByRole("button", { name: "删除 Worktree" }))
-    const dialog = screen.getByRole("dialog", { name: "删除这个 Worktree？" })
+    await user.click(screen.getByRole("button", { name: t("remove") }))
+    const dialog = screen.getByRole("dialog", { name: t("removeTitle") })
     expect(within(dialog).getByText(linkedPath)).toBeTruthy()
     expect(within(dialog).getByText("task/feature")).toBeTruthy()
-    expect(within(dialog).getByText("保留 Git 分支")).toBeTruthy()
+    expect(within(dialog).getByText(t("branchPreserved"))).toBeTruthy()
     expect(next.api.remove).not.toHaveBeenCalled()
-    await user.click(within(dialog).getByRole("button", { name: "取消" }))
+    await user.click(within(dialog).getByRole("button", { name: t("cancel") }))
     expect(screen.queryByRole("dialog")).toBeNull()
     expect(confirm).not.toHaveBeenCalled()
     expect(next.api.status).toHaveBeenCalledTimes(1)
@@ -171,12 +172,12 @@ describe("WorktreesSettings safe removal", () => {
     let resolveStatus!: (value: typeof clean) => void
     next.api.status.mockImplementationOnce(() => new Promise(resolve => { resolveStatus = resolve }))
     const user = userEvent.setup()
-    await user.click(screen.getByRole("button", { name: "删除 Worktree" }))
-    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "确认删除" }))
+    await user.click(screen.getByRole("button", { name: t("remove") }))
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: t("removeConfirmAction") }))
     expect(next.api.status).toHaveBeenLastCalledWith(linkedPath)
     expect(next.api.remove).not.toHaveBeenCalled()
     expect(next.workspaces.delete).not.toHaveBeenCalled()
-    expect(within(screen.getByRole("dialog")).getByRole("button", { name: "正在删除…" })).toHaveProperty("disabled", true)
+    expect(within(screen.getByRole("dialog")).getByRole("button", { name: t("removing") })).toHaveProperty("disabled", true)
     await act(async () => { resolveStatus(clean) })
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
     expect(next.api.remove).toHaveBeenCalledExactlyOnceWith({ repoPath: "/projects/alpha", path: linkedPath })
@@ -186,13 +187,13 @@ describe("WorktreesSettings safe removal", () => {
   })
 
   it.each([
-    ["dirty", { locked: false }, "请先提交或保存更改，再删除 Worktree。"],
-    ["locked", { locked: true }, "请先解锁这个 Worktree。"],
+    ["dirty", { locked: false }, t("removeBlocked")],
+    ["locked", { locked: true }, t("removeLocked")],
   ])("disables removal for %s worktrees with an explanation", async (name, extra, title) => {
     const next = setup({ repos: [repository("alpha", [worktree(`/projects/${name}`, name, extra)])] })
     next.mount()
     await settled()
-    const remove = screen.getByRole("button", { name: "删除 Worktree" })
+    const remove = screen.getByRole("button", { name: t("remove") })
     expect(remove).toHaveProperty("disabled", true)
     expect(remove.title).toBe(title)
     await userEvent.setup().click(remove)
@@ -208,11 +209,11 @@ describe("WorktreesSettings safe removal", () => {
     if (failure === "changed") next.api.status.mockResolvedValueOnce({ ...clean, changedFiles: 1 })
     else next.api.remove.mockRejectedValueOnce(new Error("disk removal failed"))
     const user = userEvent.setup()
-    await user.click(screen.getByRole("button", { name: "删除 Worktree" }))
-    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "确认删除" }))
-    const dialog = within(screen.getByRole("dialog", { name: "删除这个 Worktree？" }))
-    await waitFor(() => expect(dialog.getByRole("alert").textContent).toContain(failure === "changed" ? "状态已变化" : "disk removal failed"))
-    expect(dialog.getByRole("button", { name: "确认删除" })).toHaveProperty("disabled", false)
+    await user.click(screen.getByRole("button", { name: t("remove") }))
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: t("removeConfirmAction") }))
+    const dialog = within(screen.getByRole("dialog", { name: t("removeTitle") }))
+    await waitFor(() => expect(dialog.getByRole("alert").textContent).toContain(failure === "changed" ? t("removeChanged") : "disk removal failed"))
+    expect(dialog.getByRole("button", { name: t("removeConfirmAction") })).toHaveProperty("disabled", false)
     expect(next.workspaces.delete).not.toHaveBeenCalled()
     if (failure === "changed") expect(next.api.remove).not.toHaveBeenCalled()
     else expect(next.api.remove).toHaveBeenCalledExactlyOnceWith({ repoPath: "/projects/alpha", path: linkedPath })
@@ -225,7 +226,7 @@ describe("WorktreesSettings open session", () => {
     const next = setup({ items: existing ? [{ workspaceId: "existing", path: `${linkedPath}/`, title: "Existing title" }] : [] })
     next.mount()
     await settled()
-    await userEvent.setup().click(screen.getByRole("button", { name: "打开会话" }))
+    await userEvent.setup().click(screen.getByRole("button", { name: t("openSession") }))
     await waitFor(() => expect(next.close).toHaveBeenCalledExactlyOnceWith())
     expect(next.sessions.create).toHaveBeenCalledExactlyOnceWith({ workspaceId: existing ? "existing" : "new-workspace" })
     expect(next.sessions.open).toHaveBeenCalledExactlyOnceWith("new-session")

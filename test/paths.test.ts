@@ -10,7 +10,7 @@ describe("worktree path helpers", () => {
 
   it("creates safe stable slugs", () => {
     expect(slugOf(" Login fix ")).toBe("login-fix")
-    expect(slugOf("中文任务")).toBe("task")
+    expect(slugOf("タスク")).toBe("task")
     expect(slugOf("")).toBe("task")
   })
 

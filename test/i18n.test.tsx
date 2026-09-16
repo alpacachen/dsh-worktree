@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
-import { installLocale, useT } from "../src/client/lib/i18n"
+import { installLocale, t, useT } from "../src/client/lib/i18n"
 
 function createLocale() {
   let snapshot = { active: "zh", revision: 0 }
@@ -43,8 +43,8 @@ describe("i18n", () => {
     const dispose = installLocale({ get: () => locale })
     render(<CopyProbe />)
 
-    expect(screen.getByText("名称")).toBeTruthy()
-    expect(screen.getByText("基于")).toBeTruthy()
+    expect(screen.getByText(t("taskName"))).toBeTruthy()
+    expect(screen.getByText(t("basedOn"))).toBeTruthy()
 
     act(() => locale.setActive("en"))
     await waitFor(() => expect(screen.getByText("Name")).toBeTruthy())
