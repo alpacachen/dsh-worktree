@@ -9,7 +9,7 @@ A Git worktree plugin for DeepSeek Harness that creates task branches, registers
 [![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
 ![License](https://img.shields.io/badge/license-MIT-22c55e)
 
-[简体中文](README.zh.md) · **English**
+[Simplified Chinese](README.zh.md) · **English**
 
 ![Create a worktree from a new DSH session](docs/preview.png)
 

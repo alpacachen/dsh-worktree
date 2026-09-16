@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { t } from "../src/client/lib/i18n"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
@@ -34,12 +35,12 @@ describe("CreateWorktreeDialog", () => {
     const onClose = vi.fn()
     render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={onClose} />)
 
-    await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
-    expect(screen.getByRole("dialog", { name: "新建 Worktree" })).toBeTruthy()
-    expect(screen.getByRole("radio", { name: /主分支/ })).toBeTruthy()
-    expect(screen.queryByText(/新分支|目录/)).toBeNull()
-    await user.type(screen.getByLabelText("名称"), "Fix login")
-    await user.click(screen.getByRole("button", { name: "创建并打开" }))
+    await waitFor(() => expect(screen.getByRole("radio", { name: new RegExp(t("currentBranchLabel")) })).toBeTruthy())
+    expect(screen.getByRole("dialog", { name: t("dialogTitle") })).toBeTruthy()
+    expect(screen.getByRole("radio", { name: new RegExp(t("mainBranch")) })).toBeTruthy()
+    expect(screen.getAllByRole("textbox")).toHaveLength(1)
+    await user.type(screen.getByLabelText(t("taskName")), "Fix login")
+    await user.click(screen.getByRole("button", { name: t("createAndOpen") }))
 
     await waitFor(() => expect(next.sessions.open).toHaveBeenCalledWith("session-wt"))
     expect(api.create).toHaveBeenCalledWith({ repoPath: "/repo", path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" })
@@ -66,11 +67,11 @@ describe("CreateWorktreeDialog", () => {
     }
     render(<CreateWorktreeDialog target={{ workspaceId: "ws-feature" as any, path: "/repo.worktrees/feature", title: "feature" } as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={vi.fn()} />)
 
-    await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
+    await waitFor(() => expect(screen.getByRole("radio", { name: new RegExp(t("currentBranchLabel")) })).toBeTruthy())
     expect(screen.getByText("main")).toBeTruthy()
-    await user.click(screen.getByRole("radio", { name: /主分支/ }))
-    await user.type(screen.getByLabelText("名称"), "Fix login")
-    await user.click(screen.getByRole("button", { name: "创建并打开" }))
+    await user.click(screen.getByRole("radio", { name: new RegExp(t("mainBranch")) }))
+    await user.type(screen.getByLabelText(t("taskName")), "Fix login")
+    await user.click(screen.getByRole("button", { name: t("createAndOpen") }))
 
     await waitFor(() => expect(api.create).toHaveBeenCalledWith({ repoPath: "/repo", path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "main" }))
   })
@@ -91,9 +92,9 @@ describe("CreateWorktreeDialog", () => {
     }
     render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} defaultBaseChoice="main" onCreated={vi.fn()} onClose={vi.fn()} />)
 
-    await waitFor(() => expect(screen.getByRole("radio", { name: /主分支/ })).toHaveProperty("checked", true))
-    await user.type(screen.getByLabelText("名称"), "Fix login")
-    await user.click(screen.getByRole("button", { name: "创建并打开" }))
+    await waitFor(() => expect(screen.getByRole("radio", { name: new RegExp(t("mainBranch")) })).toHaveProperty("checked", true))
+    await user.type(screen.getByLabelText(t("taskName")), "Fix login")
+    await user.click(screen.getByRole("button", { name: t("createAndOpen") }))
 
     await waitFor(() => expect(api.create).toHaveBeenCalledWith({ repoPath: "/repo", path: "/repo.worktrees/fix-login", branch: "task/fix-login", baseRef: "origin/main" }))
   })
@@ -102,9 +103,9 @@ describe("CreateWorktreeDialog", () => {
     const next = services()
     const api = { list: vi.fn().mockResolvedValue({ repoPath: "/repo", commonDir: "/repo/.git", worktrees: [] }), create: vi.fn(), remove: vi.fn() }
     render(<CreateWorktreeDialog target={target as any} api={api as any} workspaces={next.workspaces as any} sessions={next.sessions as any} onCreated={vi.fn()} onClose={vi.fn()} />)
-    await waitFor(() => expect(screen.getByRole("radio", { name: /当前分支/ })).toBeTruthy())
-    expect(screen.getByRole("radio", { name: /主分支/ })).toBeTruthy()
-    expect(screen.getByRole("button", { name: "创建并打开" })).toHaveProperty("disabled", true)
+    await waitFor(() => expect(screen.getByRole("radio", { name: new RegExp(t("currentBranchLabel")) })).toBeTruthy())
+    expect(screen.getByRole("radio", { name: new RegExp(t("mainBranch")) })).toBeTruthy()
+    expect(screen.getByRole("button", { name: t("createAndOpen") })).toHaveProperty("disabled", true)
     expect(api.create).not.toHaveBeenCalled()
   })
 })
@@ -118,18 +119,18 @@ describe("NewSessionWorktreeButton", () => {
     const onOpen = vi.fn()
     render(<NewSessionWorktreeButton session={{ sessionId: "session-new" as any, blank: true }} useWorkspaces={useWorkspaces as any} onOpen={onOpen} />)
 
-    await user.click(screen.getByRole("button", { name: "创建 worktree" }))
+    await user.click(screen.getByRole("button", { name: t("createWorktree") }))
     expect(onOpen).toHaveBeenCalledWith(workspace)
   })
 
   it("stays hidden after the session is no longer blank", () => {
     render(<NewSessionWorktreeButton session={{ sessionId: "session-new" as any, blank: false }} useWorkspaces={useWorkspaces as any} onOpen={vi.fn()} />)
-    expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
+    expect(screen.queryByRole("button", { name: t("createWorktree") })).toBeNull()
   })
 
   it("stays hidden when the workspace is not a Git repository", () => {
     render(<NewSessionWorktreeButton session={{ sessionId: "session-new" as any, blank: true }} useWorkspaces={useWorkspaces as any} canCreate={() => false} onOpen={vi.fn()} />)
-    expect(screen.queryByRole("button", { name: "创建 worktree" })).toBeNull()
+    expect(screen.queryByRole("button", { name: t("createWorktree") })).toBeNull()
   })
 })
 
@@ -145,18 +146,18 @@ describe("WorktreesSettings", () => {
   it("groups linked worktrees without showing the main repository as a row", async () => {
     const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/feature", branch: "feature", isMain: false, locked: false, prunable: false }], [])
     await waitFor(() => expect(screen.getByText("feature")).toBeTruthy())
-    expect(screen.getByText("当前分支")).toBeTruthy()
-    expect(screen.queryByRole("button", { name: "打开" })).toBeNull()
+    expect(screen.getByText(t("currentBranchLabel"))).toBeTruthy()
+    expect(screen.queryByRole("button", { name: t("open") })).toBeNull()
     expect([...document.querySelectorAll(".dswt-worktree-title")].some(node => node.textContent?.includes("main"))).toBe(false)
     expect(next.workspaces.create).not.toHaveBeenCalled()
   })
 
   it("protects dirty worktrees from removal", async () => {
     const next = renderSettings([{ path: "/repo", branch: "main", isMain: true, locked: false, prunable: false }, { path: "/repo.worktrees/dirty", branch: "dirty", isMain: false, locked: false, prunable: false }], [{ workspaceId: "main", path: "/repo", title: "repo" }])
-    await waitFor(() => expect(screen.getByText("1 个文件更改")).toBeTruthy())
-    const remove = screen.getByRole("button", { name: "删除 Worktree" })
+    await waitFor(() => expect(screen.getByText(t("dirty").replace("{count}", "1"))).toBeTruthy())
+    const remove = screen.getByRole("button", { name: t("remove") })
     expect(remove).toHaveProperty("disabled", true)
-    expect(remove.title).toBe("请先提交或保存更改，再删除 Worktree。")
+    expect(remove.title).toBe(t("removeBlocked"))
     await userEvent.setup().click(remove)
     expect(screen.queryByRole("alert")).toBeNull()
     expect(screen.queryByRole("dialog")).toBeNull()
