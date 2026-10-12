@@ -1,12 +1,10 @@
-import z from '@deepseek-ai/schemastery'
 import { clientRequestSchema } from '@deepseek-ai/dsh-client-connection'
 import { readdir, readFile, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 
 const API_PREFIX = '/api/dsh-simple-worktree'
 const ENDPOINTS = ['worktree.list', 'worktree.scan', 'worktree.classify', 'worktree.create', 'worktree.remove', 'worktree.remove-session', 'worktree.status', 'worktree.prune']
-const SETTINGS_NS = 'dsh-simple-worktree'
-const SETTINGS_SCHEMA = z.object({})
 
 export const ok = (value) => ({ ok: true, value })
 const PUBLIC_ERROR_CODES = new Set([
@@ -24,7 +22,13 @@ export const cleanPath = (value) => {
   return text.length > 1 ? text.replace(/[\\/]+$/, '') : text
 }
 
-export const samePath = (left, right) => cleanPath(left) === cleanPath(right)
+const pathKey = (value) => {
+  const text = cleanPath(value)
+  return /^[a-z]:[\\/]/i.test(text) || text.startsWith('\\\\')
+    ? text.replace(/\\/g, '/').replace(/^[A-Z]:/, drive => drive.toLowerCase())
+    : text
+}
+export const samePath = (left, right) => pathKey(left) === pathKey(right)
 
 async function removeOrphanedWorktree(path) {
   if (!existsSync(path)) return false
@@ -111,7 +115,7 @@ export async function discoverGitRoots(rootPath, { signal, maxDepth = 4, maxDire
       for (const entry of entries) {
         if (!entry.isDirectory() || entry.isSymbolicLink() || IGNORED_SCAN_DIRECTORIES.has(entry.name)) continue
         if (entry.name.startsWith('.') && entry.name !== '.worktrees') continue
-        queue.push({ path: `${path}/${entry.name}`, depth: depth + 1 })
+        queue.push({ path: join(path, entry.name), depth: depth + 1 })
       }
     }))
   }
@@ -170,17 +174,9 @@ export const classifyGitError = (message) => message.includes('not a git reposit
     : undefined
 
 export const name = '@alpacachen/dsh-simple-worktree'
-export const inject = ['connection', 'subprocess', 'settings']
+export const inject = ['connection', 'subprocess']
 
 export function apply(ctx) {
-  if (typeof ctx.inject === 'function') {
-    ctx.inject(['settings'], (settingsCtx) => {
-      settingsCtx.settings.installSection(ctx, SETTINGS_NS, SETTINGS_SCHEMA, {}, {
-        setSource: () => {},
-        onChange: () => {},
-      })
-    })
-  }
   const handle = async (endpoint, payload = {}, signal) => {
     if (signal?.aborted) return fail('cancelled', 'The request was cancelled.')
 

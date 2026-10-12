@@ -1,5 +1,6 @@
 import type { WorkspaceView, IWorkspaces } from "@deepseek-ai/dsh-api-workspace-controller/client"
 import type { ISessions } from "@deepseek-ai/dsh-api-session-controller/client"
+import type { UiWorkspace } from "@deepseek-ai/dsh-client-ui-workspace/client"
 
 /** Workspace row projected by the Host Workspace Controller. */
 export type Workspace = WorkspaceView
@@ -44,8 +45,10 @@ export interface CreateWorktreeResult {
   baseRef: string
 }
 
-/** The sessions service face (`ctx.sessions`). */
-export type SessionsService = ISessions
+/** Session creation plus navigation, supplied by separate DSH services. */
+export type SessionsService = Pick<ISessions, "create"> & {
+  open: UiWorkspace["openSession"]
+}
 
 /** Minimal connection face the worktree API needs from `ctx.connection`. */
 export interface ConnectionService {

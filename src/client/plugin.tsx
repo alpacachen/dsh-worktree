@@ -17,7 +17,7 @@ import { WorkspaceActionPlacement } from "./components/WorkspaceActionPlacement"
 import { WorktreesSettings } from "./components/WorktreesSettings"
 import { createWorktreeApi } from "./lib/api"
 import { installLocale, NS, t } from "./lib/i18n"
-import { cleanPath } from "./lib/paths"
+import { pathKey } from "./lib/paths"
 import type { Workspace } from "./lib/types"
 
 /** The client plugin context surface this plugin touches. */
@@ -38,13 +38,16 @@ function installStyles() {
 
 export const WorktreePlugin = {
   name: "@alpacachen/dsh-simple-worktree",
-  inject: ["slots", "connection", "locale", "workspaces", "sessions"],
+  inject: ["slots", "connection", "locale", "workspaces", "sessions", "uiWorkspace"],
   apply(ctx: WorktreeClientContext) {
     ctx.effect(installStyles, "dsh-simple-worktree styles")
     ctx.effect(() => installLocale(ctx), "dsh-simple-worktree locale")
     const api = createWorktreeApi(ctx.connection)
     const workspaces = ctx.workspaces
-    const sessions = ctx.sessions
+    const sessions = {
+      create: ctx.sessions.create.bind(ctx.sessions),
+      open: ctx.uiWorkspace.openSession.bind(ctx.uiWorkspace),
+    }
 
     // Classification drives the "Create worktree" affordance in the
     // conversation composer: only blank sessions of Git repositories that are
@@ -77,8 +80,8 @@ export const WorktreePlugin = {
       const gitWorkspacePaths = new Set<string>()
       const worktreePaths = new Set<string>()
       for (const item of classified) {
-        if (item?.isGit && item.path) gitWorkspacePaths.add(cleanPath(item.path))
-        if (item?.isWorktree && item.path) worktreePaths.add(cleanPath(item.path))
+        if (item?.isGit && item.path) gitWorkspacePaths.add(pathKey(item.path))
+        if (item?.isWorktree && item.path) worktreePaths.add(pathKey(item.path))
       }
       classification = { gitWorkspacePaths, worktreePaths }
       for (const listener of classificationListeners) listener()
@@ -125,7 +128,7 @@ export const WorktreePlugin = {
         <WorkspaceActionPlacement><NewSessionWorktreeButton
           session={props.session}
           useWorkspaces={props.useWorkspaces}
-          canCreate={(workspace) => gitWorkspacePaths.has(cleanPath(workspace.path)) && !worktreePaths.has(cleanPath(workspace.path))}
+          canCreate={(workspace) => gitWorkspacePaths.has(pathKey(workspace.path)) && !worktreePaths.has(pathKey(workspace.path))}
           onOpen={(workspace) => openCreate(workspace, "main")}
         /></WorkspaceActionPlacement>
       )

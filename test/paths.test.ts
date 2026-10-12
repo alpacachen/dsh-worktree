@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest"
-import { cleanPath, slugOf, suggestedPath } from "../src/client/lib/paths"
+import { cleanPath, pathKey, slugOf, suggestedPath } from "../src/client/lib/paths"
 
 describe("worktree path helpers", () => {
+  it("matches Windows workspace paths with Git porcelain paths", () => {
+    expect(pathKey("C:\\repo\\task\\")).toBe(pathKey("c:/repo/task"))
+    expect(pathKey("\\\\server\\repo")).toBe(pathKey("//server/repo"))
+    expect(pathKey("/repo/a\\b")).not.toBe(pathKey("/repo/a/b"))
+  })
   it("normalizes trailing separators without changing root paths", () => {
     expect(cleanPath("/repo///")).toBe("/repo")
     expect(cleanPath("C:\\repo\\\\")).toBe("C:\\repo")

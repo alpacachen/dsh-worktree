@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { createWorktreeApi } from "../lib/api"
 import { format, useT } from "../lib/i18n"
-import { cleanPath, slugOf, suggestedPath } from "../lib/paths"
+import { pathKey, slugOf, suggestedPath } from "../lib/paths"
 import type { SessionsService, WorkspacesService, Workspace, WorktreeList } from "../lib/types"
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input } from "./ui"
 
@@ -62,7 +62,7 @@ export function CreateWorktreeDialog({ target, api, workspaces, sessions, defaul
     && !taskSlug.includes("..") && !taskSlug.endsWith(".") && !taskSlug.endsWith(".lock")
   const taskBranch = validSlug ? `task/${taskSlug}` : ""
   const taskPath = repoPath && validSlug ? suggestedPath(repoPath, taskSlug) : ""
-  const currentBranch = data?.worktrees.find((row) => cleanPath(row.path) === cleanPath(target.path))?.branch
+  const currentBranch = data?.worktrees.find((row) => pathKey(row.path) === pathKey(target.path))?.branch
     ?? "HEAD"
   const mainBranch = data?.defaultBranch
     ?? data?.worktrees.find((row) => row.isMain)?.branch

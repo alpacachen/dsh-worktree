@@ -25,7 +25,7 @@
 
 ## 兼容性
 
-基于 DSH **0.1.5** 客户端契约构建（`0.1.5-rc.1 || 0.1.5-rc.2`，web profile）。
+基于 DSH **0.2.1-alpha.2** 客户端契约构建，支持 `0.1.5-rc.1 || 0.1.5-rc.2 || 0.2.1-alpha.2`（web 和 desktop profile）。
 
 ## 使用
 
@@ -36,6 +36,8 @@ dsh plugin --profile web add @alpacachen/dsh-simple-worktree
 ```
 
 安装后重启 `dsh web`。
+
+桌面应用可在 **插件 → 添加插件** 中安装并启用，然后重启应用和 Host。
 
 也可以通过 GitHub 安装：`dsh plugin --profile web add github:alpacachen/dsh-worktree`。
 
