@@ -25,7 +25,8 @@ await esbuild.build({
     name: "inline-css",
     setup(build) {
       build.onLoad({ filter: /\.css$/ }, (args) => ({
-        contents: readFileSync(args.path, "utf8"),
+        // Keep the tracked bundle identical with Windows Git CRLF checkouts.
+        contents: readFileSync(args.path, "utf8").replace(/\r\n/g, "\n"),
         loader: "text",
       }))
     },
