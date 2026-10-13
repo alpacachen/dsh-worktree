@@ -25,7 +25,7 @@ A Git worktree plugin for DeepSeek Harness that creates task branches, registers
 
 ## Compatibility
 
-Built against the DSH **0.1.5** client contract (`0.1.5-rc.1 || 0.1.5-rc.2`, web profile).
+Built against the DSH **0.2.1-alpha.2** client contract, with support for `0.1.5-rc.1 || 0.1.5-rc.2 || 0.2.1-alpha.2` (web and desktop profiles).
 
 ## Usage
 
@@ -36,6 +36,8 @@ dsh plugin --profile web add @alpacachen/dsh-simple-worktree
 ```
 
 Restart `dsh web` after installation.
+
+In the desktop app, install the package from **Plugins → Add plugin**, enable it, and restart the app and host.
 
 You can also install from GitHub with `dsh plugin --profile web add github:alpacachen/dsh-worktree`.
 

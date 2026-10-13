@@ -47,7 +47,8 @@ function setup() {
         return () => { workspaceListeners.delete(listener) }
       },
     } },
-    sessions: {},
+    sessions: { create: vi.fn() },
+    uiWorkspace: { openSession: vi.fn() },
     effect: (effect: () => (() => void)) => { effects.push(effect()) },
     slots: {
       inject: (_name: string, register: () => void) => register(),

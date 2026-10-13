@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { apply, discoverGitRoots, fail, parseWorktrees } from "../src/host/index.js"
+import { apply, discoverGitRoots, fail, parseWorktrees, samePath } from "../src/host/index.js"
 
 function handleFor(outputs = {}) {
   const routes = new Map()
@@ -57,6 +57,10 @@ function handleFor(outputs = {}) {
 }
 
 describe("worktree porcelain parser", () => {
+  it("matches Windows workspace paths against slash-separated Git paths", () => {
+    expect(samePath("C:\\repo\\task\\", "c:/repo/task")).toBe(true)
+    expect(samePath("/repo/a\\b", "/repo/a/b")).toBe(false)
+  })
   it("discovers nested Git roots while skipping noisy directories", async () => {
     const root = await mkdtemp(join(tmpdir(), "dsh-worktree-"))
     try {
@@ -190,6 +194,16 @@ describe("worktree RPC contract", () => {
       value: { path: "/repo.worktrees/feature", isGit: true, isWorktree: true, repoPath: "/repo" },
     })
     expect((await handler("worktree.list", { path: "/repo.worktrees/feature" })).value).toMatchObject({ repoPath: "/repo", defaultBranch: "main", defaultRef: "origin/main" })
+  })
+
+  it("classifies a Windows linked workspace when Git uses forward slashes", async () => {
+    const handler = handleFor({
+      "worktree list --porcelain": porcelain.replaceAll("/repo", "C:/repo"),
+    })
+    expect(await handler("worktree.classify", { path: "c:\\repo.worktrees\\feature\\" })).toMatchObject({
+      ok: true,
+      value: { isGit: true, isWorktree: true, repoPath: "C:/repo" },
+    })
   })
 
   it("reuses an existing branch when creating a worktree", async () => {

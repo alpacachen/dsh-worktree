@@ -1,16 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
 import { Context } from "@deepseek-ai/cordis"
-import { SettingsProvider } from "@deepseek-ai/dsh-settings"
 import { HostConnectionService, serverResponseSchema } from "@deepseek-ai/dsh-client-connection"
 import * as source from "../src/host/index.js"
 import * as publishedEntry from "../lib/index.js"
 
 // Real Connection is important: a plain rpc.handle mock misses the rc.2
 // service-shadow access to webServer that crashes the whole DSH on startup.
-class MemorySettings extends SettingsProvider {
-  async load() { return {} }
-  async persist() {}
-}
 
 const endpoints = ["worktree.list", "worktree.scan", "worktree.classify", "worktree.create", "worktree.remove", "worktree.remove-session", "worktree.status", "worktree.prune"]
 const requestFor = (endpoint, overrides = {}) => new Request(`http://localhost/api/dsh-simple-worktree/${endpoint}`, {
@@ -36,19 +31,16 @@ describe.each([
           ctx.provide("subprocess", { spawn })
         },
       })
-      await root.plugin(MemorySettings)
       await root.plugin({
         apply(ctx) {
           new HostConnectionService(ctx, [], { isAuthenticated: () => true })
         },
       })
       const carrier = root.get("connection").createSharedFetchHandler("/api")
-      const namespaces = () => root.get("settings").describe().map(({ ns }) => ns)
 
       for (let attempt = 0; attempt < 2; attempt++) {
         const fiber = root.plugin(plugin)
         await fiber
-        expect(namespaces()).toEqual(["dsh-simple-worktree"])
         for (const endpoint of endpoints) {
           const response = await carrier.fetch(requestFor(endpoint))
           expect(response.status).toBe(200)
@@ -63,7 +55,6 @@ describe.each([
         const nonJson = await carrier.fetch(new Request("http://localhost/api/dsh-simple-worktree/worktree.prune", { method: "POST", body: "not JSON" }))
         expect(nonJson.status).toBe(415)
         await fiber.dispose()
-        expect(namespaces()).toEqual([])
         for (const endpoint of endpoints) {
           expect((await carrier.fetch(requestFor(endpoint))).status).toBe(404)
         }

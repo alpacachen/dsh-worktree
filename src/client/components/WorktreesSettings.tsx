@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AlertCircle, ArrowUpRight, Check, ChevronDown, ChevronRight, FolderGit2, GitBranch, GitFork, Loader2, Plus, RefreshCw, Search, Trash2, X } from "lucide-react"
 import { format, useT } from "../lib/i18n"
-import { cleanPath } from "../lib/paths"
+import { pathKey } from "../lib/paths"
 import type { Workspace, Worktree, WorktreeList, WorkspacesService, SessionsService } from "../lib/types"
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input, Select } from "./ui"
 
@@ -40,7 +40,7 @@ export function WorktreesSettings({ api, workspaces, sessions, close, onCreate }
       const lists: WorktreeList[] = await api.scan(paths, controller.signal)
       if (controller.signal.aborted) return
       const discovered = lists.filter(list => {
-        const key = cleanPath(list.repoPath)
+        const key = pathKey(list.repoPath)
         if (!key || seen.has(key)) return false
         seen.add(key); return true
       }).map(list => ({ ...list, currentBranch: list.worktrees.find(row => row.isMain)?.branch, worktrees: list.worktrees.filter(row => !row.isMain) }))
@@ -87,7 +87,7 @@ export function WorktreesSettings({ api, workspaces, sessions, close, onCreate }
   const openSession = async (repo: WorktreeList, row: Worktree) => {
     setAction(`open:${row.path}`); setError("")
     try {
-      let workspace = workspaces.list.getSnapshot().items.find(item => cleanPath(item.path) === cleanPath(row.path))
+      let workspace = workspaces.list.getSnapshot().items.find(item => pathKey(item.path) === pathKey(row.path))
       if (!workspace) {
         workspace = await workspaces.create({ path: row.path })
         await workspaces.rename(workspace.workspaceId, `${repoName(repo.repoPath)}/${row.branch ?? repoName(row.path)}`)
@@ -110,7 +110,7 @@ export function WorktreesSettings({ api, workspaces, sessions, close, onCreate }
         if (latest.changedFiles) throw new Error(t("removeChanged"))
       }
       await api.remove({ repoPath: repo.repoPath, path: row.path })
-      const workspace = workspaces.list.getSnapshot().items.find(item => cleanPath(item.path) === cleanPath(row.path))
+      const workspace = workspaces.list.getSnapshot().items.find(item => pathKey(item.path) === pathKey(row.path))
       if (workspace) await workspaces.delete(workspace.workspaceId)
       setRemoval(null)
       await refresh()

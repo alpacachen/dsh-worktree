@@ -9,7 +9,7 @@ interface NewSessionWorktreeButtonProps {
     sessionId: SessionId
     blank: boolean
   }
-  useWorkspaces: <T>(selector: (state: { items: Workspace[] }) => T) => T
+  useWorkspaces: <T>(selector: (state: { items: readonly Workspace[] }) => T) => T
   onOpen: (workspace: Workspace) => void
   canCreate?: (workspace: Workspace) => boolean
 }
